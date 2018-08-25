@@ -7,6 +7,36 @@ const SlackStrategy = require("@aoberoi/passport-slack").default.Strategy;
 const http = require("http");
 const express = require("express");
 
+passport.use(
+  new SlackStrategy(
+    {
+      clientID: process.env.SLACK_CLIENT_ID,
+      clientSecret: process.env.SLACK_CLIENT_SECRET,
+      skipUserProfile: true
+    },
+    (accessToken, scopes, team, extra, profiles, done) => {
+      botAuthorizations[team.id] = extra.bot.accessToken;
+      done(null, {});
+    }
+  )
+);
+
+const app = express();
+
+const MongoClient = require('mongodb').MongoClient
+
+app.use(passport.initialize());
+
+const port = process.env.PORT || 3000;
+
+MongoClient.connect(process.env.MONGO_DB_URI, (err, client) => {
+  if (err) return console.log(err)
+  db = client.db(process.env.MONGO_DB_NAME)
+  app.listen(port, () => {
+    console.log(`listening on ${port}`)
+  })
+})
+
 /**
  * @see https://github.com/slackapi/node-slack-events-api#usage
  */
@@ -37,23 +67,6 @@ function getClientByTeamId(teamId) {
   return null;
 }
 
-passport.use(
-  new SlackStrategy(
-    {
-      clientID: process.env.SLACK_CLIENT_ID,
-      clientSecret: process.env.SLACK_CLIENT_SECRET,
-      skipUserProfile: true
-    },
-    (accessToken, scopes, team, extra, profiles, done) => {
-      botAuthorizations[team.id] = extra.bot.accessToken;
-      done(null, {});
-    }
-  )
-);
-
-const app = express();
-
-app.use(passport.initialize());
 app.get("/", (req, res) => {
   res.send(
     '<a href="/auth/slack"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
@@ -118,9 +131,4 @@ ${error}`);
       `An error occurred while handling a Slack event: ${error.message}`
     );
   }
-});
-
-const port = process.env.PORT || 3000;
-http.createServer(app).listen(port, () => {
-  console.log(`server listening on port ${port}`);
 });
