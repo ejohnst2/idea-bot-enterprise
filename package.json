@@ -1,0 +1,9 @@
+{
+  "name": "idea-bot-enterprise",
+  "version": "1.0.0",
+  "description": "Slack enterprsie edition of the idea bot",
+  "main": "index.js",
+  "repository": "https://github.com/ChangeInit/idea-bot-enterprise.git",
+  "author": "Nick Sarafa <nicksarafa@gmail.com>",
+  "private": true
+}
