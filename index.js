@@ -7,6 +7,8 @@ const SlackStrategy = require("@aoberoi/passport-slack").default.Strategy;
 const http = require("http");
 const express = require("express");
 
+let UserModel = require("./models/User");
+
 passport.use(
   new SlackStrategy(
     {
@@ -23,19 +25,22 @@ passport.use(
 
 const app = express();
 
-const MongoClient = require('mongodb').MongoClient
+const MongoClient = require("mongodb").MongoClient;
 
 app.use(passport.initialize());
 
 const port = process.env.PORT || 3000;
 
-MongoClient.connect(process.env.MONGO_DB_URI, (err, client) => {
-  if (err) return console.log(err)
-  db = client.db(process.env.MONGO_DB_NAME)
-  app.listen(port, () => {
-    console.log(`listening on ${port}`)
-  })
-})
+MongoClient.connect(
+  process.env.MONGO_DB_URI,
+  (err, client) => {
+    if (err) return console.log(err);
+    db = client.db(process.env.MONGO_DB_NAME);
+    app.listen(port, () => {
+      console.log(`listening on ${port}`);
+    });
+  }
+);
 
 /**
  * @see https://github.com/slackapi/node-slack-events-api#usage
