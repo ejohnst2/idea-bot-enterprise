@@ -4,10 +4,28 @@ const slackEventsApi = require("@slack/events-api");
 const SlackClient = require("@slack/client").WebClient;
 const passport = require("passport");
 const SlackStrategy = require("@aoberoi/passport-slack").default.Strategy;
-const http = require("http");
 const express = require("express");
+const mongoose = require("mongoose");
+const app = express();
+const port = process.env.PORT || 3000;
 
 let UserModel = require("./models/User");
+
+/**
+ * SERVER
+ */
+
+// serve index.html to client
+app.get("/", (req, res) => {
+  res.send(
+    '<a href="/auth/slack"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
+  );
+});
+
+// middleware
+app.use(passport.initialize());
+
+/************************************************************************/
 
 passport.use(
   new SlackStrategy(
@@ -23,13 +41,7 @@ passport.use(
   )
 );
 
-const app = express();
-
 const MongoClient = require("mongodb").MongoClient;
-
-app.use(passport.initialize());
-
-const port = process.env.PORT || 3000;
 
 MongoClient.connect(
   process.env.MONGO_DB_URI,
@@ -71,12 +83,6 @@ function getClientByTeamId(teamId) {
   }
   return null;
 }
-
-app.get("/", (req, res) => {
-  res.send(
-    '<a href="/auth/slack"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
-  );
-});
 
 app.get(
   "/auth/slack",
