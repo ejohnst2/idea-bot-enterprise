@@ -23,12 +23,15 @@ app.get("/", (req, res) => {
   );
 });
 
-// middleware
+/**
+ * @desc disclude slack uris as the slack middleware rejects body-parser requests
+ */
+app.use(/\/((?!slack).)*/, bodyParser.json());
+app.use(/\/((?!slack).)*/, bodyParser.urlencoded({ extended: true }));
+app.use(/\/((?!slack).)*/, bodyParser.text());
+app.use(/\/((?!slack).)*/, bodyParser.json({ type: "Header/json" }));
+
 app.use(passport.initialize());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.text());
-app.use(bodyParser.json({ type: "Header/json" }));
 
 /************************************************************************/
 
