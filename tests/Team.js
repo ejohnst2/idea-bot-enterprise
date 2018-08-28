@@ -11,11 +11,11 @@ chai.use(chaiHtpp)
 
 describe('Team', () => {
 
-  // beforeEach((done) => {
-  //   Team.remove({}, (err) => {
-  //     done()
-  //   })
-  // })
+  beforeEach((done) => {
+    Team.deleteOne({}, (err) => {
+      done()
+    })
+  })
 
   describe('/POST Team', () => {
     it('it should NOT post Team without botAuthorization', (done) => {
@@ -26,11 +26,10 @@ describe('Team', () => {
         .post('/Team/')
         .send(team)
         .end((err, res) => {
-          console.log(res)
           res.should.have.status(200)
           res.body.should.be.a('object')
-          // res.body.should.have.property('message').eql('Team successfully saved!')
-          // res.body.Team.should.have.property('botAuthorization').eql('x-tobeosdfsd321432432432')
+          res.body.should.have.property('message').eql('Team successfully saved!')
+          res.body.Team.should.have.property('botAuthorization').eql('x-tobeosdfsd321432432432')
           done()
         })
     })

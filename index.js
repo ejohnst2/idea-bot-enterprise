@@ -6,6 +6,7 @@ const passport = require("passport");
 const SlackStrategy = require("@aoberoi/passport-slack").default.Strategy;
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -24,6 +25,10 @@ app.get("/", (req, res) => {
 
 // middleware
 app.use(passport.initialize());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.text());
+app.use(bodyParser.json({ type: "Header/json" }));
 
 /************************************************************************/
 
@@ -43,14 +48,16 @@ passport.use(
 
 const MongoClient = require("mongodb").MongoClient;
 
-mongoose.connect(process.env.MONGO_DB_URI)
+mongoose.connect(process.env.MONGO_DB_URI, {
+  useNewUrlParser: true,
+});
 
 /**
  * wrapper supresses testign suite error
  * @see http://www.marcusoft.net/2015/10/eaddrinuse-when-watching-tests-with-mocha-and-supertest.html
  */
-if(!module.parent) {
-  app.listen(port)
+if (!module.parent) {
+  app.listen(port);
 }
 
 /**
@@ -149,15 +156,18 @@ ${error}`);
  * ROUTES
  */
 
-const Team = require('./routes/Team')
+const Team = require("./routes/Team");
 
-app.route('/Team')
+app
+  .route("/Team")
   .get(Team.getTeams)
-  .post(Team.postTeam)
-app.route('/Team/:id')
+  .post(Team.postTeam);
+app
+  .route("/Team/:id")
   .get(Team.getTeam)
   .delete(Team.deleteTeam)
-  .put(Team.updateTeam)
+  .put(Team.updateTeam);
 
+/************************************************************************/
 
-module.exports = app
+module.exports = app;
