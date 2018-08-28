@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "bot": "ngrok http 3000"
+    "bot": "ngrok http 3000",
+    "test": "mocha tests --timeout 10000"
   },
   "dependencies": {
     "@aoberoi/passport-slack": "^1.0.5",
@@ -22,6 +23,9 @@
     "passport": "^0.4.0"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
+    "mocha": "^5.2.0",
     "ngrok": "^3.0.1",
     "nodemon": "^1.18.3"
   }

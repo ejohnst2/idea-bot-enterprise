@@ -43,16 +43,15 @@ passport.use(
 
 const MongoClient = require("mongodb").MongoClient;
 
-MongoClient.connect(
-  process.env.MONGO_DB_URI,
-  (err, client) => {
-    if (err) return console.log(err);
-    db = client.db(process.env.MONGO_DB_NAME);
-    app.listen(port, () => {
-      console.log(`listening on ${port}`);
-    });
-  }
-);
+mongoose.connect(process.env.MONGO_DB_URI)
+
+/**
+ * wrapper supresses testign suite error
+ * @see http://www.marcusoft.net/2015/10/eaddrinuse-when-watching-tests-with-mocha-and-supertest.html
+ */
+if(!module.parent) {
+  app.listen(port)
+}
 
 /**
  * @see https://github.com/slackapi/node-slack-events-api#usage
@@ -143,3 +142,22 @@ ${error}`);
     );
   }
 });
+
+/************************************************************************/
+
+/**
+ * ROUTES
+ */
+
+const Team = require('./routes/Team')
+
+app.route('/Team')
+  .get(Team.getTeams)
+  .post(Team.postTeam)
+app.route('/Team/:id')
+  .get(Team.getTeam)
+  .delete(Team.deleteTeam)
+  .put(Team.updateTeam)
+
+
+module.exports = app
