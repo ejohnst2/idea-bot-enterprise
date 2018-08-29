@@ -116,8 +116,8 @@ app.get(
 app.use("/slack/events", slackEvents.expressMiddleware());
 
 slackEvents.on("message", (message, body) => {
-  if (!message.subtype && message.text.indexOf("hi") >= 0) {
-    const slack = getClientByTeamId(body.team_id);
+  if (!message.subtype && message.text.indexOf("idea") >= 0) {
+    const slack = new SlackClient('xoxb-346952315347-422701107831-9sWNe8vRQnK0PSB4512LR4j2')
     if (!slack) {
       return console.log("No Authorization found for this team");
     }
@@ -127,6 +127,14 @@ slackEvents.on("message", (message, body) => {
         text: `Hello <@${message.user}>! :tada:`
       })
       .catch(console.error);
+
+    Idea.postIdea({
+      idea: message.text,
+      user: message.user,
+      // channel: message.channel,
+      // team: body.team_id
+    })
+    .catch(console.error)
   }
 });
 
@@ -160,6 +168,7 @@ ${error}`);
  */
 
 const Team = require("./routes/Team");
+const Idea = require("./routes/Idea");
 
 app
   .route("/Team")
@@ -170,6 +179,11 @@ app
   .get(Team.getTeam)
   .delete(Team.deleteTeam)
   .put(Team.updateTeam);
+
+app
+  .route("/Idea")
+  .get(Idea.getIdeas)
+  .post(Idea.postIdea);
 
 /************************************************************************/
 
