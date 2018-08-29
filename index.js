@@ -4,8 +4,64 @@ const slackEventsApi = require("@slack/events-api");
 const SlackClient = require("@slack/client").WebClient;
 const passport = require("passport");
 const SlackStrategy = require("@aoberoi/passport-slack").default.Strategy;
-const http = require("http");
 const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const app = express();
+const port = process.env.PORT || 3000;
+
+let UserModel = require("./models/User");
+
+/**
+ * SERVER
+ */
+
+// serve index.html to client
+app.get("/", (req, res) => {
+  res.send(
+    '<a href="https://slack.com/oauth/authorize?client_id=346952315347.420991484773&scope=commands,bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
+  );
+});
+
+/**
+ * @desc disclude slack uris as the slack middleware rejects body-parser requests
+ */
+app.use(/\/((?!slack).)*/, bodyParser.json());
+app.use(/\/((?!slack).)*/, bodyParser.urlencoded({ extended: true }));
+app.use(/\/((?!slack).)*/, bodyParser.text());
+app.use(/\/((?!slack).)*/, bodyParser.json({ type: "Header/json" }));
+
+app.use(passport.initialize());
+
+/************************************************************************/
+
+passport.use(
+  new SlackStrategy(
+    {
+      clientID: process.env.SLACK_CLIENT_ID,
+      clientSecret: process.env.SLACK_CLIENT_SECRET,
+      skipUserProfile: true
+    },
+    (accessToken, scopes, team, extra, profiles, done) => {
+      botAuthorizations[team.id] = extra.bot.accessToken;
+      done(null, {});
+    }
+  )
+);
+
+const MongoClient = require("mongodb").MongoClient;
+
+mongoose.connect(process.env.MONGO_DB_URI, {
+  useNewUrlParser: true,
+});
+
+/**
+ * wrapper supresses testign suite error
+ * @see http://www.marcusoft.net/2015/10/eaddrinuse-when-watching-tests-with-mocha-and-supertest.html
+ */
+if (!module.parent) {
+  app.listen(port);
+}
 
 /**
  * @see https://github.com/slackapi/node-slack-events-api#usage
@@ -36,29 +92,6 @@ function getClientByTeamId(teamId) {
   }
   return null;
 }
-
-passport.use(
-  new SlackStrategy(
-    {
-      clientID: process.env.SLACK_CLIENT_ID,
-      clientSecret: process.env.SLACK_CLIENT_SECRET,
-      skipUserProfile: true
-    },
-    (accessToken, scopes, team, extra, profiles, done) => {
-      botAuthorizations[team.id] = extra.bot.accessToken;
-      done(null, {});
-    }
-  )
-);
-
-const app = express();
-
-app.use(passport.initialize());
-app.get("/", (req, res) => {
-  res.send(
-    '<a href="/auth/slack"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
-  );
-});
 
 app.get(
   "/auth/slack",
@@ -120,7 +153,24 @@ ${error}`);
   }
 });
 
-const port = process.env.PORT || 3000;
-http.createServer(app).listen(port, () => {
-  console.log(`server listening on port ${port}`);
-});
+/************************************************************************/
+
+/**
+ * ROUTES
+ */
+
+const Team = require("./routes/Team");
+
+app
+  .route("/Team")
+  .get(Team.getTeams)
+  .post(Team.postTeam);
+app
+  .route("/Team/:id")
+  .get(Team.getTeam)
+  .delete(Team.deleteTeam)
+  .put(Team.updateTeam);
+
+/************************************************************************/
+
+module.exports = app;
