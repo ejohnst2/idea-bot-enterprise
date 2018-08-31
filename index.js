@@ -51,9 +51,12 @@ passport.use(
 
 const MongoClient = require("mongodb").MongoClient;
 
-mongoose.connect(process.env.MONGO_DB_URI, {
-  useNewUrlParser: true,
-});
+mongoose.connect(
+  process.env.MONGO_DB_URI,
+  {
+    useNewUrlParser: true
+  }
+);
 
 /**
  * wrapper supresses testign suite error
@@ -116,29 +119,38 @@ app.get(
 app.use("/slack/events", slackEvents.expressMiddleware());
 
 slackEvents.on("message", (message, body) => {
-  if (!message.subtype && message.text.indexOf("hi") >= 0) {
-    const slack = getClientByTeamId(body.team_id);
+  if (!message.subtype && message.text.indexOf("idea") >= 0) {
+    const slack = new SlackClient(
+      "xoxb-346952315347-422701107831-9sWNe8vRQnK0PSB4512LR4j2"
+    );
     if (!slack) {
       return console.log("No Authorization found for this team");
     }
+
+    console.log('idea')
+
     slack.chat
       .postMessage({
         channel: message.channel,
-        text: `Hello <@${message.user}>! :tada:`
+        text: `<@${message.user}> shared a new idea! :tada:`
       })
       .catch(console.error);
+
+    Idea.postIdea(body).catch(console.error)
   }
 });
 
 slackEvents.on("reaction_added", (event, body) => {
-  const slack = getClientByTeamId(body.team_id);
+  const slack = new SlackClient(
+    "xoxb-346952315347-422701107831-9sWNe8vRQnK0PSB4512LR4j2"
+  );
 
   if (!slack) {
     return console.error("No authnorization for this team");
   }
 
   slack.chat
-    .postMessage(event.item.channel, `${event.reaction}:`)
+    .postMessage({ channel: event.item.channel, text: `testingtons` })
     .catch(console.error);
 });
 
@@ -160,6 +172,7 @@ ${error}`);
  */
 
 const Team = require("./routes/Team");
+const Idea = require("./routes/Idea");
 
 app
   .route("/Team")
@@ -170,6 +183,11 @@ app
   .get(Team.getTeam)
   .delete(Team.deleteTeam)
   .put(Team.updateTeam);
+
+app
+  .route("/Idea")
+  .get(Idea.getIdeas)
+  .post(Idea.postIdea);
 
 /************************************************************************/
 
