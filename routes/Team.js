@@ -13,7 +13,7 @@ function postTeam(req, res) {
   const newTeam = new Team(req.body)
   newTeam.save((err, Team) => {
     if (err) res.send(err)
-    else res.json({
+    res.json({
       message: 'Team successfully saved!',
       Team
     })

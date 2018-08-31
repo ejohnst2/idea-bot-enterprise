@@ -10,8 +10,6 @@ function getIdeas(req, res) {
 }
 
 function postIdea(req, res, next) {
-  console.log("req", req);
-
   let newIdea = new Idea({
     text: req.event.text,
     user: req.event.user,
@@ -19,15 +17,9 @@ function postIdea(req, res, next) {
     teamId: req.team_id
   });
 
-  newIdea.save()
-
-  // newIdea.save(function(err, newIdea) {
-  //   if (err) return console.error(err);
-  //   else
-  //     res.json({
-  //       message: "Idea successfully saved!"
-  //     });
-  // });
+  newIdea.save(err => {
+    if (err) console.error(err);
+  });
 }
 
 module.exports = {
