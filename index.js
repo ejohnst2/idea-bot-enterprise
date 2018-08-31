@@ -118,26 +118,6 @@ app.get(
 
 app.use("/slack/events", slackEvents.expressMiddleware());
 
-slackEvents.on("message", (message, body) => {
-  if (!message.subtype && message.text.indexOf("idea") >= 0) {
-    const slack = new SlackClient(
-      "xoxb-346952315347-422701107831-9sWNe8vRQnK0PSB4512LR4j2"
-    );
-    if (!slack) {
-      return console.log("No Authorization found for this team");
-    }
-
-    slack.chat
-      .postMessage({
-        channel: message.channel,
-        text: `<@${message.user}> shared a new idea! :tada:`
-      })
-      .catch(console.error);
-
-    Idea.postIdea(body).catch(console.error)
-  }
-});
-
 slackEvents.on("reaction_added", (event, body) => {
   const slack = new SlackClient(
     "xoxb-346952315347-422701107831-9sWNe8vRQnK0PSB4512LR4j2"
