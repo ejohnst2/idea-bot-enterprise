@@ -167,6 +167,7 @@ app
  */
 app.post('/Idea', (req, res, next) => {
   Idea.postIdea(req.body)
+  res.sendStatus(200)
   next()
 })
 
