@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const IdeaSchema = new Schema({
-  idea: {
+  text: {
     type: String,
     required: true,
   },
@@ -13,9 +13,9 @@ const IdeaSchema = new Schema({
   channel: {
     type: String,
   },
-  team: {
+  teamId: {
     type: String,
-    // required: true,
+    required: true,
   }
 });
 

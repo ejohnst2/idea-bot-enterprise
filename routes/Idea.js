@@ -9,16 +9,25 @@ function getIdeas(req, res) {
   });
 }
 
-function postIdea(req, res) {
-  const newIdea = new Idea(req.body);
-  newIdea.save((err, Idea) => {
-    if (err) res.json({ err });
-    else
-      res.json({
-        message: "Idea successfully saved!",
-        Idea
-      });
+function postIdea(req, res, next) {
+  console.log("req", req);
+
+  let newIdea = new Idea({
+    text: req.event.text,
+    user: req.event.user,
+    channel: req.event.channel,
+    teamId: req.team_id
   });
+
+  newIdea.save()
+
+  // newIdea.save(function(err, newIdea) {
+  //   if (err) return console.error(err);
+  //   else
+  //     res.json({
+  //       message: "Idea successfully saved!"
+  //     });
+  // });
 }
 
 module.exports = {
