@@ -9,17 +9,15 @@ function getIdeas(req, res) {
   });
 }
 
-function postIdea(req, res, next) {
+function postIdea(req, res) {
   let newIdea = new Idea({
-    text: req.event.text,
-    user: req.event.user,
-    channel: req.event.channel,
+    text: req.text,
+    user: req.user_id,
+    channel: req.channel_name,
     teamId: req.team_id
   });
 
-  newIdea.save(err => {
-    if (err) console.error(err);
-  });
+  newIdea.save();
 }
 
 module.exports = {

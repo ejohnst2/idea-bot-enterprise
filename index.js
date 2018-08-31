@@ -127,8 +127,6 @@ slackEvents.on("message", (message, body) => {
       return console.log("No Authorization found for this team");
     }
 
-    console.log('idea')
-
     slack.chat
       .postMessage({
         channel: message.channel,
@@ -184,10 +182,13 @@ app
   .delete(Team.deleteTeam)
   .put(Team.updateTeam);
 
-app
-  .route("/Idea")
-  .get(Idea.getIdeas)
-  .post(Idea.postIdea);
+/**
+ * @desc api endpoint for the /idea slash command
+ */
+app.post('/Idea', (req, res, next) => {
+  Idea.postIdea(req.body)
+  next()
+})
 
 /************************************************************************/
 
