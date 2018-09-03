@@ -44,6 +44,7 @@ passport.use(
     },
     (accessToken, scopes, team, extra, profiles, done) => {
       botAuthorizations[team.id] = extra.bot.accessToken;
+      console.log(botAuthorizations[team.id], "yo");
       done(null, {});
     }
   )
@@ -89,9 +90,11 @@ const clients = {};
 function getClientByTeamId(teamId) {
   if (!clients[teamId] && botAuthorizations[teamId]) {
     clients[teamId] = new SlackClient(botAuthorizations[teamId]);
+    console.log(botAuthorizations[teamId])
   }
   if (clients[teamId]) {
     return clients[teamId];
+    console.log(botAuthorizations[teamId]);
   }
   return null;
 }
@@ -119,16 +122,14 @@ app.get(
 app.use("/slack/events", slackEvents.expressMiddleware());
 
 slackEvents.on("reaction_added", (event, body) => {
-  const slack = new SlackClient(
-    "xoxb-346952315347-422701107831-9sWNe8vRQnK0PSB4512LR4j2"
-  );
+  const slack = new SlackClient(botAuthorizations[team.id]);
 
   if (!slack) {
     return console.error("No authorization for this team");
   }
 
   slack.chat
-    .postMessage({ channel: event.item.channel, text: `testingtons antonio` })
+    .postMessage({ channel: event.item.channel, text: `testingtons` })
     .catch(console.error);
 
 });
@@ -145,13 +146,6 @@ ${error}`);
 });
 
 /************************************************************************/
-// to authenticate users to login to the dashboard will need passport.authenticate
-// to authorize a user when they want to log an idea user passport.authorize before the idea logs to check
-// if they are a user, steady as she goes, if not then give option if they'd like to opt in, if yes, then create a user and post an idea
-/************************************************************************/
-
-
-/************************************************************************/
 
 /**
  * ROUTES
@@ -159,6 +153,8 @@ ${error}`);
 
 const Team = require("./routes/Team");
 const Idea = require("./routes/Idea");
+const User = require("./routes/User");
+
 
 app
   .route("/Team")
@@ -173,8 +169,13 @@ app
 /**
  * @desc api endpoint for the /idea slash command
  */
+
+
 app.post('/Idea', (req, res, next) => {
   Idea.postIdea(req.body)
+  User.postUser(req.body)
+
+  // here is where authentication should happen
 
   const response = {
     response_type: 'in_channel', // || ephermal
@@ -182,9 +183,25 @@ app.post('/Idea', (req, res, next) => {
     text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
   };
 
+  console.log(req.body)
+
   res.json(response)
   next()
-})
+  },
+
+  // if user is not authentcated, here is what should happen
+  // display if they would like to authenticate themselves to use the app
+  // if yes, then post the idea and add user to the DB
+
+  (err, erq, res, next) => {
+
+    console.log('error')
+
+    res.json(response)
+    res.status(500)
+    next()
+
+  });
 
 /************************************************************************/
 
