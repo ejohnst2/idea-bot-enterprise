@@ -128,8 +128,9 @@ slackEvents.on("reaction_added", (event, body) => {
   }
 
   slack.chat
-    .postMessage({ channel: event.item.channel, text: `testingtons` })
+    .postMessage({ channel: event.item.channel, text: `testingtons antonio` })
     .catch(console.error);
+
 });
 
 slackEvents.on("error", error => {
@@ -142,6 +143,13 @@ ${error}`);
     );
   }
 });
+
+/************************************************************************/
+// to authenticate users to login to the dashboard will need passport.authenticate
+// to authorize a user when they want to log an idea user passport.authorize before the idea logs to check
+// if they are a user, steady as she goes, if not then give option if they'd like to opt in, if yes, then create a user and post an idea
+/************************************************************************/
+
 
 /************************************************************************/
 
@@ -167,8 +175,14 @@ app
  */
 app.post('/Idea', (req, res, next) => {
   Idea.postIdea(req.body)
-  console.log(req.body)
-  res.sendStatus(200)
+
+  const response = {
+    response_type: 'in_channel', // || ephermal
+    channel: req.channel_id,
+    text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
+  };
+
+  res.json(response)
   next()
 })
 
