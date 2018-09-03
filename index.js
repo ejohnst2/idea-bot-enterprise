@@ -124,7 +124,7 @@ slackEvents.on("reaction_added", (event, body) => {
   );
 
   if (!slack) {
-    return console.error("No authnorization for this team");
+    return console.error("No authorization for this team");
   }
 
   slack.chat
