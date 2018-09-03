@@ -98,6 +98,26 @@ function getClientByTeamId(teamId) {
   return null;
 }
 
+ //=============================
+//LOCAL LOGIN MIDDLEWARE FOR ACCESS TO DASHBOARD
+//=============================
+// app.post("/login", passport.authenticate("local", {
+//   successRedirect: "/QAApplicationHub",
+//   failureRedirect: "/login",
+//   failureFlash: true
+// }));
+
+// app.get("/logout", (req, res) => {
+//   req.logout();
+//   req.flash("success", "Successfuly signed out!")
+//   res.redirect("/login");
+// });
+
+function authenticateDashboardAccess(){
+
+}
+
+
 app.get(
   "/auth/slack",
   passport.authenticate("slack", {
@@ -189,13 +209,9 @@ function checkTeamAllowance(){
   // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 }
 
-function authenticateDashboardAccess(){
-
-}
-
 
 app.post('/Idea', (req, res, next) => {
-  // authenticateUser(req, res);
+  authenticateUser();
 
   Idea.postIdea(req.body)
 
