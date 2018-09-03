@@ -167,7 +167,14 @@ app
  */
 app.post('/Idea', (req, res, next) => {
   Idea.postIdea(req.body)
-  res.sendStatus(200)
+
+  const response = {
+    response_type: 'in_channel', // || ephermal
+    channel: req.channel_id,
+    text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
+  };
+
+  res.json(response)
   next()
 })
 
