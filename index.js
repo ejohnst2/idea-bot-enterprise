@@ -90,7 +90,6 @@ const clients = {};
 function getClientByTeamId(teamId) {
   if (!clients[teamId] && botAuthorizations[teamId]) {
     clients[teamId] = new SlackClient(botAuthorizations[teamId]);
-    console.log(botAuthorizations[teamId])
   }
   if (clients[teamId]) {
     return clients[teamId];
@@ -170,13 +169,38 @@ app
  * @desc api endpoint for the /idea slash command
  */
 
+// need a function to authenticate users that are not yet users
+function authenticateUser() {
+  // check if user exists in the database using findOne command
+
+// if yes, then ignore
+    // User.postUser(req.body)
+// if no, then get authentication init
+  // give them option to authenticate as a user
+   // if no
+      // they cannot post the idea
+   // if yes,
+      // checkTeamAllowance();
+      // autheticate post the idea and user to DB
+}
+
+// need a function that cross references the allowance for teams against the current amount of users in team
+function checkTeamAllowance(){
+  // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
+}
+
+function authenticateDashboardAccess(){
+
+}
+
 
 app.post('/Idea', (req, res, next) => {
+  // authenticateUser(req, res);
+
   Idea.postIdea(req.body)
-  User.postUser(req.body)
 
-  // here is where authentication should happen
 
+// call authenticateUser function here
   const response = {
     response_type: 'in_channel', // || ephermal
     channel: req.channel_id,
