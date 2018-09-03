@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 const Idea = require("../models/Idea");
 
 function getIdeas(req, res) {
-  const query = Team.find({});
+  console.log('getIdeas triggered')
+  const query = Idea.find({});
   query.exec((err, Ideas) => {
     if (err) res.send(err);
     res.json(Ideas);
