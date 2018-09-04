@@ -1,6 +1,5 @@
 require("dotenv").config();
 
-const http = require('http');
 const slackEventsApi = require("@slack/events-api");
 const SlackClient = require("@slack/client").WebClient;
 const passport = require("passport");
@@ -47,7 +46,6 @@ passport.use(
     },
     (accessToken, scopes, team, extra, profiles, done) => {
       botAuthorizations[team.id] = extra.bot.accessToken;
-      console.log(botAuthorizations[team.id], "yo");
       done(null, {});
     }
   )
@@ -96,7 +94,6 @@ function getClientByTeamId(teamId) {
   }
   if (clients[teamId]) {
     return clients[teamId];
-    console.log(botAuthorizations[teamId]);
   }
   return null;
 }
