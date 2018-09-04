@@ -229,6 +229,46 @@ function checkTeamAllowance(){
 
 const UserSchema = require("./models/User");
 
+const firstIdea = {
+    "text": "This is your first idea, please opt in to post it!",
+    "attachments": [
+        {
+            "text": "Would you like to opt in?",
+            "fallback": "You are unable to choose a game",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "actions": [
+                {
+                    "name": "game",
+                    "text": "Yes",
+                    "type": "button",
+                    "value": "yes",
+                    "callback_id": "add_user"
+                },
+                {
+                    "name": "game",
+                    "text": "No",
+                    "type": "button",
+                    "callback_id": "add_user",
+                    "value": "no"
+                }
+            ]
+        }
+    ]
+}
+
+// app.post('/slack/actions', (req, res) =>{
+//     res.status(200).end() // best practice to respond with 200 status
+//     // var actionJSONPayload = JSON.parse(req.body.payload) // parse URL-encoded payload JSON string
+//     var message = {
+//         "text": "clicked: ",
+//         "replace_original": false
+//     }
+//     res.json(message)
+// })
+
+// create an endorsement action
+
 
 app.post('/Idea', (req, res, next) => {
 
@@ -240,14 +280,9 @@ app.post('/Idea', (req, res, next) => {
           }
           //No user was found... so create a new user with values from request (all the profile. stuff)
           if (!user) {
-              user = new User({
-                  team: req.body.team_id,
-                  username: req.body.user_id,
-              });
-              user.save(function(err) {
-                  if (err) console.log(err);
-                  return done(err, user);
-              });
+              console.log('you aint no goddamn user yet')
+              res.json(firstIdea);
+              // User.postUser(req.body)
           } else {
             //found user. steady as she goes
             const response = {

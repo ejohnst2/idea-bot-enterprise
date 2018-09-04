@@ -14,7 +14,6 @@ function postUser(req, res) {
     username: req.user_id,
     team: req.team_id
   });
-
   newUser.save();
 }
 
