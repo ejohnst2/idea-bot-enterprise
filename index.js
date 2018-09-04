@@ -193,24 +193,7 @@ app
  * @desc api endpoint for the /idea slash command
  */
 
-// need a function to authenticate users that are not yet users
 
-
-function authenticateUser() {
-  // check if user exists in the database using findOne command
-
-// if yes, then ignore
-    // User.postUser(req.body)
-// if no, then get authentication init
-  // give them option to authenticate as a user
-   // if no
-      // they cannot post the idea
-   // if yes,
-      // checkTeamAllowance();
-      // autheticate post the idea and user to DB
-}
-
-// need a function that cross references the allowance for teams against the current amount of users in team
 function checkTeamAllowance(){
   // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 }
@@ -237,19 +220,12 @@ const UserSchema = require("./models/User");
 app.use('/slack/actions', slackInteractions.expressMiddleware());
 
 
-// function logInit() {
-//   console.log('this working')
-// }
-
-// slackInteractions.action('add_user', logInit);
-
-
 const firstIdea = {
     "text": "This is your first idea, please opt in to post it!",
     "attachments": [
         {
             "text": "Would you like to opt in?",
-            "fallback": "You are unable to choose a game",
+            "fallback": "You are unable to choose at this time because your company got no monies",
             "color": "#3AA3E3",
             "callback_id": "add_user",
             "attachment_type": "default",
@@ -277,7 +253,7 @@ const firstIdea = {
 slackInteractions.action('endorse_idea', addEndorsement);
 
 function addEndorsement(){
-  console.log('yo')
+  console.log('this is working, now just need endorsement logic init')
 }
 
 
@@ -317,9 +293,10 @@ app.post('/Idea', (req, res, next) => {
           if (err) {
               return done(err);
           }
-          //No user was found... so create a new user with values from request (all the profile. stuff)
+          //No user was found... so give them the option to opt in
           if (!user) {
               console.log('you aint no goddamn user yet')
+              // check allowance before prompting them
               return res.json(firstIdea)
           } else {
             //found user, steady as she goes
@@ -337,27 +314,6 @@ app.post('/Idea', (req, res, next) => {
   next()
 
 });
-
-
-//   User.postUser(req.body)
-//   Idea.postIdea(req.body)
-
-// // call authenticateUser function here
-//   const response = {
-//     response_type: 'in_channel', // || ephermal
-//     channel: req.channel_id,
-//     text: `<@${req.body.user_id}> posted a blue idea! \n\n ${req.body.text}`,
-//   };
-
-//   console.log(req.body)
-
-//   res.json(response)
-//   next()
-//   },
-
-  // if user is not authentcated, here is what should happen
-  // display if they would like to authenticate themselves to use the app
-  // if yes, then post the idea and add user to the DB
 
 /************************************************************************/
 
