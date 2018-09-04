@@ -139,6 +139,8 @@ app.get(
   }
 );
 
+// get app using different capabilities of the slack API
+
 app.use("/slack/events", slackEvents.expressMiddleware());
 app.use('/slack/actions', slackInteractions.expressMiddleware());
 
@@ -234,6 +236,13 @@ function checkTeamAllowance(){
 
 const UserSchema = require("./models/User");
 
+function logInit() {
+  console.log('this working')
+}
+
+slackInteractions.action("add_user", logInit);
+
+
 const firstIdea = {
     "text": "This is your first idea, please opt in to post it!",
     "attachments": [
@@ -262,6 +271,8 @@ const firstIdea = {
     ]
 }
 
+
+
 // app.post('/slack/actions', (req, res) =>{
 //     res.status(200).end() // best practice to respond with 200 status
 //     // var actionJSONPayload = JSON.parse(req.body.payload) // parse URL-encoded payload JSON string
@@ -277,6 +288,12 @@ const firstIdea = {
 
 app.post('/Idea', (req, res, next) => {
 
+  const idea_response = {
+  response_type: 'in_channel', // || ephermal
+  channel: req.channel_id,
+  text: `<@${req.body.user_id}>, you're a goddamn user already, and you posted a new idea! \n\n ${req.body.text}`,
+  };
+
     UserSchema.findOne({
           username: req.body.user_id
       }, function(err, user) {
@@ -290,13 +307,8 @@ app.post('/Idea', (req, res, next) => {
               // User.postUser(req.body)
           } else {
             //found user. steady as she goes
-            const response = {
-            response_type: 'in_channel', // || ephermal
-            channel: req.channel_id,
-            text: `<@${req.body.user_id}>, you're a goddamn user already, and you posted a new idea! \n\n ${req.body.text}`,
-            };
             Idea.postIdea(req.body)
-            res.json(response);
+            res.json(idea_response);
             next()
           }
       })
