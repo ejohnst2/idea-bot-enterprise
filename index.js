@@ -19,11 +19,23 @@ let UserModel = require("./models/User");
  */
 
 // serve index.html to client
+
 app.get("/", (req, res) => {
   res.send(
     `<a href="https://slack.com/oauth/authorize?client_id=${process.env.SLACK_CLIENT_ID}&scope=commands,bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`
   );
 });
+
+
+// serve dashboard.html to client
+// use sign in with Slack to verify access
+
+app.get("/dashboard", (req, res) => {
+  res.send(
+  `<a href=https://slack.com/oauth/authorize?scope=identity.basic,identity.team&client_id=${process.env.SLACK_CLIENT_ID}><img src="https://api.slack.com/img/sign_in_with_slack.png" /></a>`
+  )
+});
+
 
 /**
  * @desc disclude slack uris as the slack middleware rejects body-parser requests
@@ -42,6 +54,7 @@ passport.use(
     {
       clientID: process.env.SLACK_CLIENT_ID,
       clientSecret: process.env.SLACK_CLIENT_SECRET,
+      scope: ['identity.basic', 'identity.team'],
       skipUserProfile: true
     },
     (accessToken, scopes, team, extra, profiles, done) => {
