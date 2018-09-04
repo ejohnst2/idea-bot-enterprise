@@ -17,7 +17,16 @@ function postUser(req, res) {
   newUser.save();
 }
 
+function postUserPayload(payload, res) {
+  let newUser = new User({
+    username: payload.user.id,
+    team: payload.team.id
+  });
+  newUser.save();
+}
+
 module.exports = {
   getUsers,
+  postUserPayload,
   postUser
 };

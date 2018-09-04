@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const http = require('http');
 const slackEventsApi = require("@slack/events-api");
 const SlackClient = require("@slack/client").WebClient;
 const passport = require("passport");
@@ -142,8 +143,6 @@ app.get(
 // get app using different capabilities of the slack API
 
 app.use("/slack/events", slackEvents.expressMiddleware());
-app.use('/slack/actions', slackInteractions.expressMiddleware());
-
 
 slackEvents.on("reaction_added", (event, body) => {
   const slack = new SlackClient(botAuthorizations[team.id]);
@@ -235,12 +234,14 @@ function checkTeamAllowance(){
 
 
 const UserSchema = require("./models/User");
+app.use('/slack/actions', slackInteractions.expressMiddleware());
 
-function logInit() {
-  console.log('this working')
-}
 
-slackInteractions.action("add_user", logInit);
+// function logInit() {
+//   console.log('this working')
+// }
+
+// slackInteractions.action('add_user', logInit);
 
 
 const firstIdea = {
@@ -250,17 +251,17 @@ const firstIdea = {
             "text": "Would you like to opt in?",
             "fallback": "You are unable to choose a game",
             "color": "#3AA3E3",
+            "callback_id": "add_user",
             "attachment_type": "default",
             "actions": [
                 {
-                    "name": "game",
+                    "name": "add_user",
                     "text": "Yes",
                     "type": "button",
-                    "value": "yes",
-                    "callback_id": "add_user"
+                    "value": "yes"
                 },
                 {
-                    "name": "game",
+                    "name": "add_user",
                     "text": "No",
                     "type": "button",
                     "callback_id": "add_user",
@@ -271,20 +272,36 @@ const firstIdea = {
     ]
 }
 
+// create an endorsement action, can endorse an idea directly on the idea itself in Slack
+
+slackInteractions.action('endorse_idea', addEndorsement);
+
+function addEndorsement(){
+  console.log('yo')
+}
 
 
-// app.post('/slack/actions', (req, res) =>{
-//     res.status(200).end() // best practice to respond with 200 status
-//     // var actionJSONPayload = JSON.parse(req.body.payload) // parse URL-encoded payload JSON string
-//     var message = {
-//         "text": "clicked: ",
-//         "replace_original": false
-//     }
-//     res.json(message)
-// })
+// for first time ideators to opt in as a user of the app
 
-// create an endorsement action
+slackInteractions.action({callbackId: 'add_user'}, createUserAndIdea)
 
+function createUserAndIdea(payload, respond) {
+  console.log(`The user chose ${payload.actions[0].value} ${payload.user.id} ${payload.team.id}`);
+
+  if (payload.actions[0].value === 'yes') {
+    console.log('add the user and send response')
+    respond ({text: "Great! You're now a user, you can now log your ideas until that money run out boy."});
+
+    User.postUserPayload(payload)
+
+  }
+  if (payload.actions[0].value === 'no') {
+    respond ({text: "Ok then, you can miss out on the action"});
+  }
+};
+
+
+// when a user posts an idea in a channel
 
 app.post('/Idea', (req, res, next) => {
 
@@ -303,10 +320,9 @@ app.post('/Idea', (req, res, next) => {
           //No user was found... so create a new user with values from request (all the profile. stuff)
           if (!user) {
               console.log('you aint no goddamn user yet')
-              res.json(firstIdea);
-              // User.postUser(req.body)
+              return res.json(firstIdea)
           } else {
-            //found user. steady as she goes
+            //found user, steady as she goes
             Idea.postIdea(req.body)
             res.json(idea_response);
             next()
