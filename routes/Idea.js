@@ -2,8 +2,10 @@ const mongoose = require("mongoose");
 const Idea = require("../models/Idea");
 
 function getIdeas(req, res) {
-  console.log('getIdeas triggered')
-  const query = Idea.find({});
+  let last_id = null;
+  const idea_per_page = 10;
+
+  const query = Idea.find({}).sort({ _id: -1 });
   query.exec((err, Ideas) => {
     if (err) res.send(err);
     res.json(Ideas);
