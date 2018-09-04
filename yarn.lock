@@ -52,6 +52,18 @@
   optionalDependencies:
     express "^4.0.0"
 
+"@slack/interactive-messages@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@slack/interactive-messages/-/interactive-messages-1.0.1.tgz#4748c50601629835570d4b45593c3668e2069692"
+  dependencies:
+    axios "^0.18.0"
+    debug "^3.1.0"
+    lodash.isfunction "^3.0.9"
+    lodash.isplainobject "^4.0.6"
+    lodash.isregexp "^4.0.1"
+    lodash.isstring "^4.0.1"
+    raw-body "^2.3.3"
+
 "@types/events@*":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-1.2.0.tgz#81a6731ce4df43619e5c8c945383b3e62a89ea86"
@@ -2315,9 +2327,17 @@ lodash.get@4.4.2:
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
 
-lodash.isfunction@^3.0.8:
+lodash.isfunction@^3.0.8, lodash.isfunction@^3.0.9:
   version "3.0.9"
   resolved "https://registry.yarnpkg.com/lodash.isfunction/-/lodash.isfunction-3.0.9.tgz#06de25df4db327ac931981d1bdb067e5af68d051"
+
+lodash.isplainobject@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz#7c526a52d89b45c45cc690b88163be0497f550cb"
+
+lodash.isregexp@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/lodash.isregexp/-/lodash.isregexp-4.0.1.tgz#e13e647b30cd559752a04cd912086faf7da1c30b"
 
 lodash.isstring@^4.0.1:
   version "4.0.1"

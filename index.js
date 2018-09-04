@@ -4,6 +4,8 @@ const slackEventsApi = require("@slack/events-api");
 const SlackClient = require("@slack/client").WebClient;
 const passport = require("passport");
 const SlackStrategy = require("@aoberoi/passport-slack").default.Strategy;
+const { createMessageAdapter } = require('@slack/interactive-messages');
+const slackInteractions = createMessageAdapter(process.env.SLACK_SIGNING_SECRET);
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -138,6 +140,8 @@ app.get(
 );
 
 app.use("/slack/events", slackEvents.expressMiddleware());
+app.use('/slack/actions', slackInteractions.expressMiddleware());
+
 
 slackEvents.on("reaction_added", (event, body) => {
   const slack = new SlackClient(botAuthorizations[team.id]);
@@ -226,6 +230,7 @@ function checkTeamAllowance(){
 //   ));
 
 // }
+
 
 const UserSchema = require("./models/User");
 
