@@ -11,7 +11,8 @@ function getUsers(req, res) {
 
 function postUser(req, res) {
   let newUser = new User({
-    username: req.user_id
+    username: req.user_id,
+    team: req.team_id
   });
 
   newUser.save();

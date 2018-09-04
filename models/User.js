@@ -3,7 +3,24 @@ const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
   username: String,
-  team: [{ type: Schema.Types.ObjectId, ref: 'Team' }]
+  team: String
 });
+
+UserSchema.statics.findOrCreate = function findOrCreate(profile, cb){
+    var userObj = new this();
+    this.findOne({username : profile.user_id},function(err,result){
+        if(!result){
+            userObj.username = profile.user_id;
+            //....
+            userObj.save(cb);
+        }else{
+            cb(err,result);
+        }
+    });
+};
+
+// use team as reference instead of hardcoded
+// team: [{ type: Schema.Types.ObjectId, ref: 'Team' }]
+
 
 module.exports = mongoose.model("User", UserSchema);

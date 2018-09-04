@@ -113,9 +113,8 @@ function getClientByTeamId(teamId) {
 //   res.redirect("/login");
 // });
 
-function authenticateDashboardAccess(){
 
-}
+// add a slash command for ideaboard so people can access it on demand, make that only visible to the person
 
 
 app.get(
@@ -190,6 +189,8 @@ app
  */
 
 // need a function to authenticate users that are not yet users
+
+
 function authenticateUser() {
   // check if user exists in the database using findOne command
 
@@ -210,38 +211,85 @@ function checkTeamAllowance(){
 }
 
 
+// function authenticateUser(req){
+
+//   passport.use(new SlackStrategy({
+//       clientID: process.env.SLACK_CLIENT_ID,
+//       clientSecret: process.env.SLACK_CLIENT_SECRET,
+//       callbackURL: 'https://ee5f062a.ngrok.io/auth/slack/callback',
+//   }, function(accessToken, refreshToken, profile, done) {
+//     console.log(profile.user_id)
+//     User.findOrCreate({username: profile.user_id}, function (error, user) {
+//       return done(error, user);
+//     });
+//   }
+//   ));
+
+// }
+
+const UserSchema = require("./models/User");
+
+
 app.post('/Idea', (req, res, next) => {
-  authenticateUser();
 
-  Idea.postIdea(req.body)
-
-
-// call authenticateUser function here
-  const response = {
-    response_type: 'in_channel', // || ephermal
-    channel: req.channel_id,
-    text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
-  };
-
-  console.log(req.body)
-
-  res.json(response)
-  next()
+    UserSchema.findOne({
+          username: req.body.user_id
+      }, function(err, user) {
+          if (err) {
+              return done(err);
+          }
+          //No user was found... so create a new user with values from request (all the profile. stuff)
+          if (!user) {
+              user = new User({
+                  team: req.body.team_id,
+                  username: req.body.user_id,
+              });
+              user.save(function(err) {
+                  if (err) console.log(err);
+                  return done(err, user);
+              });
+          } else {
+            //found user. steady as she goes
+            const response = {
+            response_type: 'in_channel', // || ephermal
+            channel: req.channel_id,
+            text: `<@${req.body.user_id}>, you're a goddamn user already, and you posted a new idea! \n\n ${req.body.text}`,
+            };
+            Idea.postIdea(req.body)
+            res.json(response);
+            next()
+          }
+      })
   },
+
+  (err, erq, res, next) => {
+  console.log('error')
+  res.json(response)
+  res.status(500)
+  next()
+
+});
+
+
+//   User.postUser(req.body)
+//   Idea.postIdea(req.body)
+
+// // call authenticateUser function here
+//   const response = {
+//     response_type: 'in_channel', // || ephermal
+//     channel: req.channel_id,
+//     text: `<@${req.body.user_id}> posted a blue idea! \n\n ${req.body.text}`,
+//   };
+
+//   console.log(req.body)
+
+//   res.json(response)
+//   next()
+//   },
 
   // if user is not authentcated, here is what should happen
   // display if they would like to authenticate themselves to use the app
   // if yes, then post the idea and add user to the DB
-
-  (err, erq, res, next) => {
-
-    console.log('error')
-
-    res.json(response)
-    res.status(500)
-    next()
-
-  });
 
 /************************************************************************/
 
