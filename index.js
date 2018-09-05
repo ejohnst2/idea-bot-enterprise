@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const app = express();
 const port = process.env.PORT || 3000;
+const cors = require("cors");
 
 let UserModel = require("./models/User");
 
@@ -22,6 +23,9 @@ app.get("/", (req, res) => {
     '<a href="https://slack.com/oauth/authorize?client_id=346952315347.420991484773&scope=commands,bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
   );
 });
+
+// cors init
+app.use(cors({ origin: port }));
 
 /**
  * @desc disclude slack uris as the slack middleware rejects body-parser requests
@@ -162,21 +166,24 @@ app
   .delete(Team.deleteTeam)
   .put(Team.updateTeam);
 
+// get route for our ideas
+app.route("/Idea").get(Idea.getIdeas);
+
 /**
  * @desc api endpoint for the /idea slash command
  */
-app.post('/Idea', (req, res, next) => {
-  Idea.postIdea(req.body)
+app.post("/Idea", (req, res, next) => {
+  Idea.postIdea(req.body);
 
   const response = {
-    response_type: 'in_channel', // || ephermal
+    response_type: "in_channel", // || ephermal
     channel: req.channel_id,
-    text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
+    text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`
   };
 
-  res.json(response)
-  next()
-})
+  res.json(response);
+  next();
+});
 
 /************************************************************************/
 
