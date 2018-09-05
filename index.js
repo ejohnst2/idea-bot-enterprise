@@ -49,6 +49,8 @@ app.use(passport.initialize());
 
 /************************************************************************/
 
+// the overall authentication strategy used for auth requests, conditional on whether it's add to slack or sign in with
+
 passport.use(
   new SlackStrategy(
     {
@@ -299,38 +301,6 @@ app.post('/Idea', (req, res, next) => {
   next()
 
 });
-
-// function authenticateUser(req){
-
-//   passport.use(new SlackStrategy({
-//       clientID: process.env.SLACK_CLIENT_ID,
-//       clientSecret: process.env.SLACK_CLIENT_SECRET,
-//       callbackURL: 'https://ee5f062a.ngrok.io/auth/slack/callback',
-//   }, function(accessToken, refreshToken, profile, done) {
-//     console.log(profile.user_id)
-//     User.findOrCreate({username: profile.user_id}, function (error, user) {
-//       return done(error, user);
-//     });
-//   }
-//   ));
-
-// }
-
- //=============================
-//LOCAL LOGIN MIDDLEWARE FOR ACCESS TO DASHBOARD
-//=============================
-// app.post("/login", passport.authenticate("local", {
-//   successRedirect: "/QAApplicationHub",
-//   failureRedirect: "/login",
-//   failureFlash: true
-// }));
-
-// app.get("/logout", (req, res) => {
-//   req.logout();
-//   req.flash("success", "Successfuly signed out!")
-//   res.redirect("/login");
-// });
-
 
 // add a slash command for ideaboard so people can access it on demand, make that only visible to the person
 
