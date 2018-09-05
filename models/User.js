@@ -20,7 +20,6 @@ UserSchema.statics.findOrCreate = function findOrCreate(profile, cb){
 };
 
 // use team as reference instead of hardcoded
-// team: [{ type: Schema.Types.ObjectId, ref: 'Team' }]
 
 
 module.exports = mongoose.model("User", UserSchema);

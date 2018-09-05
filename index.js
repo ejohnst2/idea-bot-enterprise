@@ -204,10 +204,6 @@ app
  */
 
 
-function checkTeamAllowance(){
-  // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
-}
-
 
 // function authenticateUser(req){
 
@@ -262,10 +258,17 @@ const firstIdea = {
 
 slackInteractions.action('endorse_idea', addEndorsement);
 
-function addEndorsement(){
+function addEndorsement(req){
+  Endorsement.postEndorsement(req)
   console.log('this is working, now just need endorsement logic init')
 }
 
+function checkTeamAllowance(req){
+  if (TeamSchema.findOne({type: req.user.team}).allowance === UserSchema.count({ team: user.team })) {
+    return console.log('cannot add user, send admin notification')
+  }
+  // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
+}
 
 // for first time ideators to opt in as a user of the app
 
@@ -279,7 +282,6 @@ function createUserAndIdea(payload, respond) {
     respond ({text: "Great! You're now a user, you can now log your ideas until that money run out boy."});
 
     User.postUserPayload(payload)
-
   }
   if (payload.actions[0].value === 'no') {
     respond ({text: "Ok then, you can miss out on the action"});
@@ -294,7 +296,7 @@ app.post('/Idea', (req, res, next) => {
   const idea_response = {
   response_type: 'in_channel', // || ephermal
   channel: req.channel_id,
-  text: `<@${req.body.user_id}>, you're a goddamn user already, and you posted a new idea! \n\n ${req.body.text}`,
+  text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
   };
 
     UserSchema.findOne({
