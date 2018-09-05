@@ -11,6 +11,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const app = express();
 const port = process.env.PORT || 3000;
+const cors = require("cors");
 
 let UserModel = require("./models/User");
 
@@ -26,7 +27,6 @@ app.get("/", (req, res) => {
   );
 });
 
-
 // serve dashboard.html to client
 // use sign in with Slack to verify access
 
@@ -36,6 +36,8 @@ app.get("/dashboard", (req, res) => {
   )
 });
 
+// cors init
+app.use(cors({ origin: port }));
 
 /**
  * @desc disclude slack uris as the slack middleware rejects body-parser requests
@@ -187,6 +189,9 @@ app
   .delete(Team.deleteTeam)
   .put(Team.updateTeam);
 
+// get route for our ideas
+app.route("/Idea").get(Idea.getIdeas);
+
 /**
  * @desc api endpoint for the /idea slash command
  */
@@ -265,6 +270,8 @@ function createUserAndIdea(payload, respond) {
 
 
 // when a user posts an idea in a channel
+// add a slash command for ideaboard so people can access it on demand, make that only visible to the person
+
 app.post('/Idea', (req, res, next) => {
 
   const idea_response = {
@@ -302,7 +309,6 @@ app.post('/Idea', (req, res, next) => {
 
 });
 
-// add a slash command for ideaboard so people can access it on demand, make that only visible to the person
 
 /************************************************************************/
 
