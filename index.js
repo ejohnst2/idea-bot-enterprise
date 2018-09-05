@@ -32,7 +32,7 @@ app.get("/", (req, res) => {
 
 app.get("/dashboard", (req, res) => {
   res.send(
-  `<a href=https://slack.com/oauth/authorize?scope=identity.basic,identity.team&client_id=${process.env.SLACK_CLIENT_ID}><img src="https://api.slack.com/img/sign_in_with_slack.png" /></a>`
+  `<a href=https://slack.com/oauth/authorize?scope=identity.basic,identity.team&client_id=${process.env.SLACK_CLIENT_ID}><img alt="Sign in with Slack" height="40" width="172" src="https://platform.slack-edge.com/img/sign_in_with_slack.png" srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, https://platform.slack-edge.com/img/sign_in_with_slack@2x.png 2x" /></a>`
   )
 });
 
@@ -58,7 +58,10 @@ passport.use(
       skipUserProfile: true
     },
     (accessToken, scopes, team, extra, profiles, done) => {
-      botAuthorizations[team.id] = extra.bot.accessToken;
+      console.log(accessToken, scopes, team, extra, profiles, done)
+      if (extra.bot != null){
+        botAuthorizations[team.id] = extra.bot.accessToken;
+      }
       done(null, {});
     }
   )
@@ -110,25 +113,6 @@ function getClientByTeamId(teamId) {
   }
   return null;
 }
-
- //=============================
-//LOCAL LOGIN MIDDLEWARE FOR ACCESS TO DASHBOARD
-//=============================
-// app.post("/login", passport.authenticate("local", {
-//   successRedirect: "/QAApplicationHub",
-//   failureRedirect: "/login",
-//   failureFlash: true
-// }));
-
-// app.get("/logout", (req, res) => {
-//   req.logout();
-//   req.flash("success", "Successfuly signed out!")
-//   res.redirect("/login");
-// });
-
-
-// add a slash command for ideaboard so people can access it on demand, make that only visible to the person
-
 
 app.get(
   "/auth/slack",
@@ -187,6 +171,8 @@ ${error}`);
 const Team = require("./routes/Team");
 const Idea = require("./routes/Idea");
 const User = require("./routes/User");
+const Endorsement = require("./routes/Endorsement");
+
 
 
 app
@@ -203,26 +189,13 @@ app
  * @desc api endpoint for the /idea slash command
  */
 
-
-
-// function authenticateUser(req){
-
-//   passport.use(new SlackStrategy({
-//       clientID: process.env.SLACK_CLIENT_ID,
-//       clientSecret: process.env.SLACK_CLIENT_SECRET,
-//       callbackURL: 'https://ee5f062a.ngrok.io/auth/slack/callback',
-//   }, function(accessToken, refreshToken, profile, done) {
-//     console.log(profile.user_id)
-//     User.findOrCreate({username: profile.user_id}, function (error, user) {
-//       return done(error, user);
-//     });
-//   }
-//   ));
-
-// }
-
-
 const UserSchema = require("./models/User");
+const TeamSchema = require("./models/Team");
+const IdeaSchema = require("./models/Idea");
+const EndorsementSchema = require("./models/Endorsement");
+
+
+
 app.use('/slack/actions', slackInteractions.expressMiddleware());
 
 
@@ -254,24 +227,23 @@ const firstIdea = {
     ]
 }
 
-// create an endorsement action, can endorse an idea directly on the idea itself in Slack
 
+// endorsement action, can endorse an idea directly on the idea itself in Slack
 slackInteractions.action('endorse_idea', addEndorsement);
 
-function addEndorsement(req){
-  Endorsement.postEndorsement(req)
-  console.log('this is working, now just need endorsement logic init')
+function addEndorsement(payload){
+  Endorsement.postSlackEndorsement(payload)
 }
 
+// if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 function checkTeamAllowance(req){
-  if (TeamSchema.findOne({type: req.user.team}).allowance === UserSchema.count({ team: user.team })) {
+  if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
     return console.log('cannot add user, send admin notification')
+    // how do you raise the next action from happening?
   }
-  // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 }
 
 // for first time ideators to opt in as a user of the app
-
 slackInteractions.action({callbackId: 'add_user'}, createUserAndIdea)
 
 function createUserAndIdea(payload, respond) {
@@ -290,7 +262,6 @@ function createUserAndIdea(payload, respond) {
 
 
 // when a user posts an idea in a channel
-
 app.post('/Idea', (req, res, next) => {
 
   const idea_response = {
@@ -312,6 +283,7 @@ app.post('/Idea', (req, res, next) => {
               return res.json(firstIdea)
           } else {
             //found user, steady as she goes
+            checkTeamAllowance(req.body)
             Idea.postIdea(req.body)
             res.json(idea_response);
             next()
@@ -326,6 +298,40 @@ app.post('/Idea', (req, res, next) => {
   next()
 
 });
+
+// function authenticateUser(req){
+
+//   passport.use(new SlackStrategy({
+//       clientID: process.env.SLACK_CLIENT_ID,
+//       clientSecret: process.env.SLACK_CLIENT_SECRET,
+//       callbackURL: 'https://ee5f062a.ngrok.io/auth/slack/callback',
+//   }, function(accessToken, refreshToken, profile, done) {
+//     console.log(profile.user_id)
+//     User.findOrCreate({username: profile.user_id}, function (error, user) {
+//       return done(error, user);
+//     });
+//   }
+//   ));
+
+// }
+
+ //=============================
+//LOCAL LOGIN MIDDLEWARE FOR ACCESS TO DASHBOARD
+//=============================
+// app.post("/login", passport.authenticate("local", {
+//   successRedirect: "/QAApplicationHub",
+//   failureRedirect: "/login",
+//   failureFlash: true
+// }));
+
+// app.get("/logout", (req, res) => {
+//   req.logout();
+//   req.flash("success", "Successfuly signed out!")
+//   res.redirect("/login");
+// });
+
+
+// add a slash command for ideaboard so people can access it on demand, make that only visible to the person
 
 /************************************************************************/
 

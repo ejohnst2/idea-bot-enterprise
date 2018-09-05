@@ -1,15 +1,16 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-var Idea = mongoose.model('Idea', IdeaSchema);
-var User = mongoose.model('User', UserSchema);
+// var Idea = mongoose.model('Idea', Idea);
+// var User = mongoose.model('User', User);
+// mongoose.Schema.Types.ObjectId, ref: 'Idea'
 
 const EndorsementSchema = new Schema({
   user: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'User',
+    type: String,
     required: true,
   },
   idea_id: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'Idea',
+    type: String,
     required: true,
   }
 });

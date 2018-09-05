@@ -1,25 +1,21 @@
 const mongoose = require("mongoose");
 const Endorsement = require("../models/Endorsement");
 
-function getEndorsements(req, res) {
-  const query = Idea.find({});
-  query.exec((err, Endorsements) => {
-    if (err) res.send(err);
-    res.json(Endorsements);
-  });
-}
+function postSlackEndorsement(req, res) {
 
-function postEndorsement(req, res) {
+  let myRegexp = /\n\n (.*)/;
+  let match = myRegexp.exec(req.message.text)[1];
+
+  let idea_reference = IdeaSchema.findOne({text: match})
+
   let newEndorsement = new Endorsement({
-    ideator_id: req.text,
-    user: req.user_id,
-    idea_id: req.channel_name
+    user: req.user.id,
+    idea_id: idea_reference
   });
 
   newEndorsement.save();
 }
 
 module.exports = {
-  getEndorsements,
-  postEndorsement
+  postSlackEndorsement
 };
