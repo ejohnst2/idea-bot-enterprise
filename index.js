@@ -232,6 +232,7 @@ const firstIdea = {
 slackInteractions.action('endorse_idea', addEndorsement);
 
 function addEndorsement(payload){
+  console.log('yo')
   Endorsement.postSlackEndorsement(payload)
 }
 

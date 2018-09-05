@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-// var Idea = mongoose.model('Idea', Idea);
-// var User = mongoose.model('User', User);
+
+// Replace strings with refereneces by importing the relevant schemas
 // mongoose.Schema.Types.ObjectId, ref: 'Idea'
 
 const EndorsementSchema = new Schema({
