@@ -62,7 +62,6 @@ passport.use(
       skipUserProfile: true
     },
     (accessToken, scopes, team, extra, profiles, done) => {
-      console.log(accessToken, scopes, team, extra, profiles, done)
       if (extra.bot != null){
         botAuthorizations[team.id] = extra.bot.accessToken;
       }
@@ -239,14 +238,13 @@ const firstIdea = {
 slackInteractions.action('endorse_idea', addEndorsement);
 
 function addEndorsement(payload){
-  console.log('yo')
   Endorsement.postSlackEndorsement(payload)
 }
 
 // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 function checkTeamAllowance(req){
   if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
-    return console.log('cannot add user, send admin notification')
+    // send admin a private message
     // how do you raise the next action from happening?
   }
 }
@@ -254,17 +252,14 @@ function checkTeamAllowance(req){
 // for first time ideators to opt in as a user of the app
 slackInteractions.action({callbackId: 'add_user'}, createUserAndIdea)
 
-function createUserAndIdea(payload, respond) {
-  console.log(`The user chose ${payload.actions[0].value} ${payload.user.id} ${payload.team.id}`);
-
+function createUserAndIdea(payload, idea, respond) {
   if (payload.actions[0].value === 'yes') {
-    console.log('add the user and send response')
-    respond ({text: "Great! You're now a user, you can now log your ideas until that money run out boy."});
+    respond ({text: "Awesome, you're now a user and can now log your ideas whenever you have them."});
 
     User.postUserPayload(payload)
   }
   if (payload.actions[0].value === 'no') {
-    respond ({text: "Ok then, you can miss out on the action"});
+    respond ({text: "Ok then, sorry to see you miss out on the ideation"});
   }
 };
 
@@ -288,7 +283,6 @@ app.post('/Idea', (req, res, next) => {
           }
           //No user was found... so give them the option to opt in
           if (!user) {
-              console.log('you aint no goddamn user yet')
               // check allowance before prompting them
               return res.json(firstIdea)
           } else {
@@ -302,7 +296,6 @@ app.post('/Idea', (req, res, next) => {
   },
 
   (err, erq, res, next) => {
-  console.log('error')
   res.json(response)
   res.status(500)
   next()
