@@ -206,7 +206,7 @@ app.use('/slack/actions', slackInteractions.expressMiddleware());
 
 
 const firstIdea = {
-    "text": "This is your first idea, please opt in to post it!",
+    "text": "Idea wasn't recorded because you're not yet a user within your team. Would you like to become one?",
     "attachments": [
         {
             "text": "Would you like to opt in?",
@@ -254,8 +254,8 @@ slackInteractions.action({callbackId: 'add_user'}, createUserAndIdea)
 
 function createUserAndIdea(payload, respond) {
   if (payload.actions[0].value === 'yes') {
-    respond ({text: "Awesome, you're now a user and can now log your ideas whenever you have them."});
-
+    respond ({text: "Awesome, you're now a user and can now log your idea!. Give it a go!"});
+    // Idea.postIdea(ideaStore)
     User.postUserPayload(payload)
   }
   if (payload.actions[0].value === 'no') {
@@ -274,6 +274,7 @@ app.post('/Idea', (req, res, next) => {
   channel: req.channel_id,
   text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
   };
+
 
     UserSchema.findOne({
           username: req.body.user_id
