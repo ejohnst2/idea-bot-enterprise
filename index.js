@@ -58,7 +58,7 @@ passport.use(
     {
       clientID: process.env.SLACK_CLIENT_ID,
       clientSecret: process.env.SLACK_CLIENT_SECRET,
-      scope: ['identity.basic', 'identity.team'],
+      scope: ['identity.basic', 'identity.team', 'users.list', 'chat:write:bot'],
       skipUserProfile: true
     },
     (accessToken, scopes, team, extra, profiles, done) => {
@@ -244,6 +244,22 @@ function addEndorsement(payload){
 // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 function checkTeamAllowance(req){
   if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
+
+  UserSchema.findOne({team: req.team}, {admin: true}, function (err, admin){
+
+    let adminChannelId = 'channel'
+
+    var message = {
+      token: botAuthorizations[teamId],
+      channel: adminChannelId,
+      as_user: false,
+      username: "daniel",
+      text: "Hey human, your team is having so many ideas that you might need to upgrade your plan."
+    }
+
+    chat.postMessage();
+
+  });
     // send admin a private message
     // how do you raise the next action from happening?
   }
@@ -256,6 +272,7 @@ function createUserAndIdea(payload, respond) {
   if (payload.actions[0].value === 'yes') {
     respond ({text: "Awesome, you're now a user and can now log your ideas whenever you have them."});
 
+    console.log(payload)
     User.postUserPayload(payload)
   }
   if (payload.actions[0].value === 'no') {
