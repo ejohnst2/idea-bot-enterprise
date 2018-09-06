@@ -252,7 +252,7 @@ function checkTeamAllowance(req){
 // for first time ideators to opt in as a user of the app
 slackInteractions.action({callbackId: 'add_user'}, createUserAndIdea)
 
-function createUserAndIdea(payload, idea, respond) {
+function createUserAndIdea(payload, respond) {
   if (payload.actions[0].value === 'yes') {
     respond ({text: "Awesome, you're now a user and can now log your ideas whenever you have them."});
 
