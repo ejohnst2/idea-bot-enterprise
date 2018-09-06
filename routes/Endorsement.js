@@ -9,15 +9,18 @@ function postSlackEndorsement(req, res) {
 
   // query the DB to find the idea that the text is referencing
 
-  // let idea_reference = IdeaSchema.findOne({text: match})
 
-  // save endorsement with placeholder
-  let newEndorsement = new Endorsement({
-    user: req.user.id,
-    idea_id: match
+  IdeaSchema.findOne({text: match}, function (err, idea) {
+
+      let newEndorsement = new Endorsement({
+      user: req.user.id,
+      idea_id: idea
+
   });
 
   newEndorsement.save();
+
+  });
 }
 
 module.exports = {

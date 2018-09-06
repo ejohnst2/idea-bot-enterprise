@@ -210,7 +210,7 @@ const firstIdea = {
     "attachments": [
         {
             "text": "Would you like to opt in?",
-            "fallback": "You are unable to choose at this time because your company got no monies",
+            "fallback": "Please contact your administrator to upgrade your plan.",
             "color": "#3AA3E3",
             "callback_id": "add_user",
             "attachment_type": "default",
