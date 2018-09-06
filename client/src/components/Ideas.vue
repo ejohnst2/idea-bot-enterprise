@@ -1,20 +1,22 @@
 <template>
   <v-container fluid>
 
-    <v-text-field
+    <v-container>
+      <v-text-field
         hide-details
         prepend-icon="search"
         single-line
         type="text"
         v-model="search"
-        placeholder="Search ideas.." 
+        placeholder="Search ideas.."
       >
-    </v-text-field>
+      </v-text-field>
+    </v-container>
 
     <v-layout row wrap>
       <v-flex xs12 sm6 md4 v-for="idea in filteredIdeas" :key="idea._id">
         <v-card>
-          <v-layout row align-center spacer>
+          <v-layout row align-center spacer v-on:click="search = ( idea.user )" class="clickable">
             <v-flex xs2 sm2 md2>
               <v-avatar
                   slot="activator"
@@ -81,3 +83,8 @@ export default {
   }
 };
 </script>
+<style>
+  .clickable {
+    cursor: pointer;
+  }
+</style>
