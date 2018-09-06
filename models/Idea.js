@@ -13,6 +13,9 @@ const IdeaSchema = new Schema({
   channel: {
     type: String,
   },
+  category: {
+    type: String,
+  },
   teamId: {
     type: String,
     required: true,

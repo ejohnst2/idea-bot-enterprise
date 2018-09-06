@@ -13,10 +13,18 @@ function getIdeas(req, res) {
 }
 
 function postIdea(req, res) {
+
+  // let category_regex = /\B\#\w\w+\b/g
+  // let category = req.text(category_regex);
+
+  let category_regex = /\B\#\w\w+\b/g;
+  let category = (req.text).match(category_regex);
+
   let newIdea = new Idea({
     text: req.text,
     user: req.user_id,
     channel: req.channel_name,
+    category: category,
     teamId: req.team_id
   });
 
