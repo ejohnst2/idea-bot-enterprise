@@ -1,6 +1,6 @@
 <template>
   <v-toolbar fixed dark scroll-off-screen>
-    <v-toolbar-side-icon></v-toolbar-side-icon>
+    <v-toolbar-side-icon class="hidden-md-and-up"></v-toolbar-side-icon>
     <v-toolbar-title>Ideas Init</v-toolbar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items class="hidden-sm-and-down">
