@@ -275,12 +275,6 @@ app.post('/Idea', (req, res, next) => {
   text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
   };
 
-  let category_regex = /\B\#\w\w+\b/g;
-  let category = (req.body.text).match(category_regex);
-  // let category = req.body.text(category_regex);
-
-  console.log(category)
-
     UserSchema.findOne({
           username: req.body.user_id
       }, function(err, user) {
