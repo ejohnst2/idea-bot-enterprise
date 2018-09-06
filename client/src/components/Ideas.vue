@@ -1,7 +1,18 @@
 <template>
   <v-container fluid>
+
+    <v-text-field
+        hide-details
+        prepend-icon="search"
+        single-line
+        type="text"
+        v-model="search"
+        placeholder="Search ideas.." 
+      >
+    </v-text-field>
+
     <v-layout row wrap>
-      <v-flex xs12 sm6 md4 v-for="idea in ideas" :key="idea._id">
+      <v-flex xs12 sm6 md4 v-for="idea in filteredIdeas" :key="idea._id">
         <v-card>
           <v-layout row align-center spacer>
             <v-flex xs2 sm2 md2>
@@ -43,7 +54,9 @@ export default {
   name: "ideas",
   data() {
     return {
-      ideas: []
+      search: "",
+      ideas: [],
+      users: []
     };
   },
   mounted() {
@@ -53,6 +66,13 @@ export default {
     async getIdeas() {
       const response = await IdeaServices.fetchIdeas();
       this.ideas = response.data;
+    }
+  },
+  computed: {
+    filteredIdeas() {
+      return this.ideas.filter(idea => {
+        return idea.user.toLowerCase().includes(this.search.toLowerCase());
+      });
     }
   }
 };
