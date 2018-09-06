@@ -69,9 +69,13 @@ export default {
     }
   },
   computed: {
+    // filter the ideas by the idea text or user name
     filteredIdeas() {
       return this.ideas.filter(idea => {
-        return idea.user.toLowerCase().includes(this.search.toLowerCase());
+        return (
+          idea.text.toLowerCase().includes(this.search.toLowerCase()) ||
+          idea.user.toLowerCase().includes(this.search.toLowerCase())
+        );
       });
     }
   }
