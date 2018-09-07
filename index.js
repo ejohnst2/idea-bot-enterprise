@@ -250,7 +250,7 @@ function checkTeamAllowance(req){
   // connect to web client to call api methods such as retreiving info and sending direct messages
   const web = new SlackClient(process.env.BOT_USER_ACCESS_TOKEN);
 
-  if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
+  // if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
     // retrieving the users list for the slack workspace
     web.users.list()
     .then((res) => {
@@ -258,7 +258,7 @@ function checkTeamAllowance(req){
         // looping through to find all members where admin is true
         if(c.is_admin === true) {
           // message each admin to let them know that they need to upgrade their plan
-          web.chat.postMessage({ channel: c.id, text: 'Your team is almost at its limit, log in to upgrade plan.' })
+          web.chat.postMessage({ channel: c.id, text: `Your team is almost at its limit, log in to <https://www.innervate.app/${c.team_id}/|your team dashboard> to upgrade plan.` })
           .then((res) => {
             console.log('Message sent: ', res.ts);
           })
@@ -267,7 +267,7 @@ function checkTeamAllowance(req){
       });
     })
     .catch(console.error);
-  }
+  // }
 }
 
 // for first time ideators to opt in as a user of the app
