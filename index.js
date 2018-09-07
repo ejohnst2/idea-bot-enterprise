@@ -13,10 +13,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 const cors = require("cors");
 
-let UserModel = require("./models/User");
-
-// configuring web API to make api calls
-
 
 /**
  * SERVER
@@ -250,7 +246,7 @@ function checkTeamAllowance(req){
   // connect to web client to call api methods such as retreiving info and sending direct messages
   const web = new SlackClient(process.env.BOT_USER_ACCESS_TOKEN);
 
-  // if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
+  if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
     // retrieving the users list for the slack workspace
     web.users.list()
     .then((res) => {
@@ -267,7 +263,7 @@ function checkTeamAllowance(req){
       });
     })
     .catch(console.error);
-  // }
+  }
 }
 
 // for first time ideators to opt in as a user of the app
@@ -277,7 +273,6 @@ function createUserAndIdea(payload, respond) {
   if (payload.actions[0].value === 'yes') {
     respond ({text: "Awesome, you're now a user and can now log your ideas whenever you have them."});
 
-    console.log(payload)
     User.postUserPayload(payload)
   }
   if (payload.actions[0].value === 'no') {
