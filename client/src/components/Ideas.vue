@@ -4,12 +4,16 @@
     <v-container>
       <v-text-field
         hide-details
-        prepend-icon="search"
+        prepend-inner-icon="search"
         single-line
         type="text"
         v-model="search"
         placeholder="Search ideas.."
+        solo
+        clearable
+        @click:clear="clearSearch"
       >
+      <div>clear</div>
       </v-text-field>
     </v-container>
 
@@ -68,17 +72,26 @@ export default {
     async getIdeas() {
       const response = await IdeaServices.fetchIdeas();
       this.ideas = response.data;
+    },
+    clearSearch() {
+      this.search = ''
     }
   },
   computed: {
     // filter the ideas by the idea text or user name
     filteredIdeas() {
-      return this.ideas.filter(idea => {
-        return (
-          idea.text.toLowerCase().includes(this.search.toLowerCase()) ||
-          idea.user.toLowerCase().includes(this.search.toLowerCase())
-        );
-      });
+      if (this.search) {
+        return this.ideas.filter(idea => {
+          if (idea.text != null) {
+            return (
+              idea.text.toLowerCase().includes(this.search.toLowerCase()) ||
+              idea.user.toLowerCase().includes(this.search.toLowerCase())
+            );
+          }
+        });
+      } else {
+        return this.ideas
+      }
     }
   }
 };
