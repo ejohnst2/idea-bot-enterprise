@@ -250,11 +250,13 @@ function checkTeamAllowance(req){
     // retrieving the users list for the slack workspace
     web.users.list()
     .then((res) => {
-      res.members.forEach(c => {
+      res.members.forEach(member => {
         // looping through to find all members where admin is true
-        if(c.is_admin === true) {
+        if(member.is_admin === true) {
+          User.postAdminUser(member)
+          console.log(member)
           // message each admin to let them know that they need to upgrade their plan
-          web.chat.postMessage({ channel: c.id, text: `Your team is almost at its limit, log in to <https://www.innervate.app/${c.team_id}/|your team dashboard> to upgrade plan.` })
+          web.chat.postMessage({ channel: member.id, text: `Your team is almost at its limit, log in to <https://www.innervate.app/${member.team_id}/|your team dashboard> to upgrade plan.` })
           .then((res) => {
             console.log('Message sent: ', res.ts);
           })

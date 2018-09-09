@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   username: String,
   team: String,
-  admin: Boolean
+  isAdmin: Boolean
 });
 
 
