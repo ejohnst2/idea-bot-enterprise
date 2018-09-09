@@ -255,8 +255,9 @@ slackInteractions.action({callbackId: 'add_user'}, createUserOnIdea)
 function createUserOnIdea(payload, respond) {
   if (payload.actions[0].value === 'yes') {
     respond ({text: "Awesome, you're now a user and can now log your idea!. Give it a go!"});
-    // Idea.postIdea(ideaStore)
-    User.postUserPayload(payload)
+
+    User.postUser(payload);
+    checkTeamAllowance(req.body);
   }
   if (payload.actions[0].value === 'no') {
     respond ({text: "Ok then, sorry to see you miss out on the ideation"});
@@ -284,12 +285,10 @@ app.post('/Idea', (req, res, next) => {
           }
           //No user was found... so give them the option to opt in
           if (!user) {
-              // check allowance before prompting them
+              // give user the ability to opt in
               return res.json(firstIdea)
           } else {
             //found user, steady as she goes
-            checkTeamAllowance(req.body)
-            console.log(req.body)
             Idea.postIdea(req.body)
             res.json(idea_response);
             next()
