@@ -253,8 +253,8 @@ function checkTeamAllowance(req){
       res.members.forEach(member => {
         // looping through to find all members where admin is true
         if(member.is_admin === true) {
+          // store admin in DB
           User.postAdminUser(member)
-          console.log(member)
           // message each admin to let them know that they need to upgrade their plan
           web.chat.postMessage({ channel: member.id, text: `Your team is almost at its limit, log in to <https://www.innervate.app/${member.team_id}/|your team dashboard> to upgrade plan.` })
           .then((res) => {
@@ -284,8 +284,6 @@ function createUserAndIdea(payload, respond) {
 
 
 // when a user posts an idea in a channel
-// add a slash command for ideaboard so people can access it on demand, make that only visible to the person
-
 app.post('/Idea', (req, res, next) => {
 
   const idea_response = {
