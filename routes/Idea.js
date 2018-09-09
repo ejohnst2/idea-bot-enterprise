@@ -37,6 +37,7 @@ function postIdea(req, res) {
       text: req.text,
       user: req.user_id,
       channel: req.channel_name,
+      category: null,
       teamId: req.team_id
     });
 
