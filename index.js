@@ -50,6 +50,10 @@ app.use(passport.initialize());
 
 /************************************************************************/
 
+const UserSchema = require("./models/User");
+const TeamSchema = require("./models/Team");
+
+
 // the overall authentication strategy used for auth requests, conditional on whether it's add to slack or sign in with
 
 passport.use(
@@ -61,7 +65,9 @@ passport.use(
       skipUserProfile: true
     },
     (accessToken, scopes, team, extra, profiles, done) => {
+      console.log(team)
       if (extra.bot != null){
+        Team.postTeamOnInstall(team, extra.bot.accessToken);
         botAuthorizations[team.id] = extra.bot.accessToken;
       }
       done(null, {});
@@ -194,18 +200,11 @@ app.route("/Idea").get(Idea.getIdeas);
  * @desc api endpoint for the /idea slash command
  */
 
-const UserSchema = require("./models/User");
-const TeamSchema = require("./models/Team");
-const IdeaSchema = require("./models/Idea");
-const EndorsementSchema = require("./models/Endorsement");
-
-
-
 app.use('/slack/actions', slackInteractions.expressMiddleware());
 
 
 const firstIdea = {
-    "text": "This is your first idea, please opt in to post it!",
+    "text": "Idea wasn't recorded because you're not yet a user within your team. Would you like to become one?",
     "attachments": [
         {
             "text": "Would you like to opt in?",
@@ -242,12 +241,10 @@ function addEndorsement(payload){
 
 // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 function checkTeamAllowance(req){
-
   // connect to web client to call api methods such as retreiving info and sending direct messages
   const web = new SlackClient(process.env.BOT_USER_ACCESS_TOKEN);
 
-  if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
-    // retrieving the users list for the slack workspace
+  if (TeamSchema.findOne({team_id: req.slack_team_id }).allowance === UserSchema.count({ team: req.team_id })) {
     web.users.list()
     .then((res) => {
       res.members.forEach(member => {
@@ -269,13 +266,14 @@ function checkTeamAllowance(req){
 }
 
 // for first time ideators to opt in as a user of the app
-slackInteractions.action({callbackId: 'add_user'}, createUserAndIdea)
+slackInteractions.action({callbackId: 'add_user'}, createUserOnIdea)
 
-function createUserAndIdea(payload, respond) {
+function createUserOnIdea(payload, respond) {
   if (payload.actions[0].value === 'yes') {
-    respond ({text: "Awesome, you're now a user and can now log your ideas whenever you have them."});
+    respond ({text: "Awesome, you're now a user and can now log your idea!. Give it a go!"});
 
-    User.postUserPayload(payload)
+    User.postUser(payload);
+    checkTeamAllowance(req.body);
   }
   if (payload.actions[0].value === 'no') {
     respond ({text: "Ok then, sorry to see you miss out on the ideation"});
@@ -292,6 +290,7 @@ app.post('/Idea', (req, res, next) => {
   text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
   };
 
+
     UserSchema.findOne({
           username: req.body.user_id
       }, function(err, user) {
@@ -300,11 +299,10 @@ app.post('/Idea', (req, res, next) => {
           }
           //No user was found... so give them the option to opt in
           if (!user) {
-              // check allowance before prompting them
+              // give user the ability to opt in
               return res.json(firstIdea)
           } else {
             //found user, steady as she goes
-            checkTeamAllowance(req.body)
             Idea.postIdea(req.body)
             res.json(idea_response);
             next()

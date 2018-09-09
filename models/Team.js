@@ -4,7 +4,13 @@ const Schema = mongoose.Schema;
 const TeamSchema = new Schema({
   botAuthorization: {
     type: String,
-    allowance: Number,
+    required: true,
+  },
+  slack_team_id:{
+    type: String,
+  },
+  allowance: {
+    type: Number,
     required: true,
   }
 });

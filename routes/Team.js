@@ -9,8 +9,12 @@ function getTeams(req, res) {
   })
 }
 
-function postTeam(req, res) {
-  const newTeam = new Team(req.body)
+function postTeamOnInstall(req, auth, res) {
+  const newTeam = new Team({
+    team_id: req.id,
+    allowance: 20,
+    botAuthorization: auth
+  });
   newTeam.save((err, Team) => {
     if (err) res.send(err)
     res.json({
@@ -19,6 +23,18 @@ function postTeam(req, res) {
     })
   })
 }
+
+function postTeam(req, res) {
+  const newTeam = new Team(req.body);
+  newTeam.save((err, Team) => {
+    if (err) res.send(err)
+    res.json({
+      message: 'Team successfully saved!',
+      Team
+    })
+  })
+}
+
 
 function getTeam(req, res) {
   Team.findById(req.params.id, (err, Team) => {
@@ -55,6 +71,7 @@ function updateTeam(req, res) {
 
 module.exports = {
   getTeams,
+  postTeamOnInstall,
   postTeam,
   getTeam,
   deleteTeam,

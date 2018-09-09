@@ -9,14 +9,6 @@ function getUsers(req, res) {
   })
 }
 
-function postUser(req, res) {
-  let newUser = new User({
-    username: req.user_id,
-    team_id: req.team_id
-  });
-  newUser.save();
-}
-
 function postAdminUser(req, res) {
   let newUser = new User({
     username: req.id,
@@ -26,17 +18,15 @@ function postAdminUser(req, res) {
   newUser.save();
 }
 
-function postUserPayload(payload, res) {
+function postUser(req, res) {
   let newUser = new User({
-    username: payload.user.id,
-    team_id: payload.team.id
+    username: req.user.id,
+    team_id: req.team.id
   });
   newUser.save();
 }
 
-
 module.exports = {
   getUsers,
-  postUserPayload,
   postUser
 };

@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
-import { IdeaSchema } from './Idea';
-const Idea = mongoose.model('Idea', IdeaSchema);
-
-// Replace strings with refereneces by importing the relevant schemas
-// mongoose.Schema.Types.ObjectId, ref: 'Idea'
+require('./Idea');
 
 const EndorsementSchema = new Schema({
   user: {
@@ -14,7 +9,7 @@ const EndorsementSchema = new Schema({
   },
   idea_id: {
     type: mongoose.Schema.Types.ObjectId, ref: 'Idea',
-    // required: true,
+    required: true,
   }
 });
 
