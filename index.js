@@ -51,7 +51,6 @@ app.use(passport.initialize());
 /************************************************************************/
 
 // the overall authentication strategy used for auth requests, conditional on whether it's add to slack or sign in with
-
 passport.use(
   new SlackStrategy(
     {
@@ -175,6 +174,14 @@ const Idea = require("./routes/Idea");
 const User = require("./routes/User");
 const Endorsement = require("./routes/Endorsement");
 
+/**
+ * MODELS
+ */
+
+const UserSchema = require("./models/User");
+const TeamSchema = require("./models/Team");
+const IdeaSchema = require("./models/Idea");
+const EndorsementSchema = require("./models/Endorsement");
 
 
 app
@@ -190,16 +197,10 @@ app
 // get route for our ideas
 app.route("/Idea").get(Idea.getIdeas);
 
+
 /**
  * @desc api endpoint for the /idea slash command
  */
-
-const UserSchema = require("./models/User");
-const TeamSchema = require("./models/Team");
-const IdeaSchema = require("./models/Idea");
-const EndorsementSchema = require("./models/Endorsement");
-
-
 
 app.use('/slack/actions', slackInteractions.expressMiddleware());
 
@@ -242,10 +243,9 @@ function addEndorsement(payload){
 
 // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
 function checkTeamAllowance(req){
-
   // connect to web client to call api methods such as retreiving info and sending direct messages
   const web = new SlackClient(process.env.BOT_USER_ACCESS_TOKEN);
-
+  // check if the team allownace (based on subscription) is at its limit on each user added
   if (TeamSchema.findOne({type: req.team}).allowance === UserSchema.count({ team: req.team })) {
     // retrieving the users list for the slack workspace
     web.users.list()
@@ -272,8 +272,10 @@ slackInteractions.action({callbackId: 'add_user'}, createUserAndIdea)
 function createUserAndIdea(payload, respond) {
   if (payload.actions[0].value === 'yes') {
     respond ({text: "Awesome, you're now a user and can now log your ideas whenever you have them."});
-
-    User.postUserPayload(payload)
+    // each time a new user is added, cross check the team's package status
+    checkTeamAllowance(req.body);
+    // use the user info from the returned payload of the slack action to store users
+    User.postUserPayload(payload);
   }
   if (payload.actions[0].value === 'no') {
     respond ({text: "Ok then, sorry to see you miss out on the ideation"});
@@ -281,9 +283,7 @@ function createUserAndIdea(payload, respond) {
 };
 
 
-// when a user posts an idea in a channel
-// add a slash command for ideaboard so people can access it on demand, make that only visible to the person
-
+// post an idea
 app.post('/Idea', (req, res, next) => {
 
   const idea_response = {
@@ -304,7 +304,6 @@ app.post('/Idea', (req, res, next) => {
               return res.json(firstIdea)
           } else {
             //found user, steady as she goes
-            checkTeamAllowance(req.body)
             Idea.postIdea(req.body)
             res.json(idea_response);
             next()
