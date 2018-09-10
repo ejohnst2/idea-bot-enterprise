@@ -13,13 +13,12 @@ function getIdeas(req, res) {
 }
 
 function postIdea(req, res) {
-
   // let category_regex = /\B\#\w\w+\b/g
   // let category = req.text(category_regex);
 
-  if ((req.text).includes('#')) {
+  if (req.text.includes("#")) {
     let category_regex = /\B\#\w\w+\b/g;
-    let category = (req.text).match(category_regex);
+    let category = req.text.match(category_regex);
 
     let newIdea = new Idea({
       text: req.text,
@@ -30,9 +29,7 @@ function postIdea(req, res) {
     });
 
     newIdea.save();
-
   } else {
-
     let newIdea = new Idea({
       text: req.text,
       user: req.user_id,
@@ -42,7 +39,6 @@ function postIdea(req, res) {
     });
 
     newIdea.save();
-
   }
 }
 

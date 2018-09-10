@@ -1,9 +1,35 @@
 <template>
   <v-container fluid>
+
+    <v-container>
+      <v-text-field
+        hide-details
+        prepend-inner-icon="search"
+        single-line
+        type="text"
+        v-model="search"
+        placeholder="Search ideas.."
+        solo
+        clearable
+        @click:clear="clearSearch"
+      >
+      <div>clear</div>
+      </v-text-field>
+    </v-container>
+
+    <v-container>
+      <v-progress-circular
+        v-if="this.isLoading === true"
+        :width="3"
+        color="green"
+        indeterminate
+      ></v-progress-circular>
+    </v-container>
+
     <v-layout row wrap>
-      <v-flex xs12 sm6 md4 v-for="idea in ideas" :key="idea._id">
+      <v-flex xs12 sm6 md4 v-for="idea in filteredIdeas" :key="idea._id">
         <v-card>
-          <v-layout row align-center spacer>
+          <v-layout row align-center spacer v-on:click="search = ( idea.user )" class="clickable">
             <v-flex xs2 sm2 md2>
               <v-avatar
                   slot="activator"
@@ -43,17 +69,47 @@ export default {
   name: "ideas",
   data() {
     return {
-      ideas: []
+      search: "",
+      ideas: [],
+      users: [],
+      isLoading: false
     };
   },
   mounted() {
-    this.getIdeas();
+    this.isLoading = true;
+    this.fetchIdeas();
   },
   methods: {
-    async getIdeas() {
-      const response = await IdeaServices.fetchIdeas();
+    async fetchIdeas() {
+      const response = await IdeaServices.getIdeas();
       this.ideas = response.data;
+      this.isLoading = false;
+    },
+    clearSearch() {
+      this.search = "";
+    }
+  },
+  computed: {
+    // filter the ideas by the idea text or user name
+    filteredIdeas() {
+      if (this.search) {
+        return this.ideas.filter(idea => {
+          if (idea.text != null) {
+            return (
+              idea.text.toLowerCase().includes(this.search.toLowerCase()) ||
+              idea.user.toLowerCase().includes(this.search.toLowerCase())
+            );
+          }
+        });
+      } else {
+        return this.ideas;
+      }
     }
   }
 };
 </script>
+<style>
+.clickable {
+  cursor: pointer;
+}
+</style>
