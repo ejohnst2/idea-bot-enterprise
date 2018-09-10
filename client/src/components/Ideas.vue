@@ -17,6 +17,15 @@
       </v-text-field>
     </v-container>
 
+    <v-container>
+      <v-progress-circular
+        v-if="this.isLoading === true"
+        :width="3"
+        color="green"
+        indeterminate
+      ></v-progress-circular>
+    </v-container>
+
     <v-layout row wrap>
       <v-flex xs12 sm6 md4 v-for="idea in filteredIdeas" :key="idea._id">
         <v-card>
@@ -62,19 +71,22 @@ export default {
     return {
       search: "",
       ideas: [],
-      users: []
+      users: [],
+      isLoading: false
     };
   },
   mounted() {
+    this.isLoading = true;
     this.fetchIdeas();
   },
   methods: {
     async fetchIdeas() {
       const response = await IdeaServices.getIdeas();
       this.ideas = response.data;
+      this.isLoading = false;
     },
     clearSearch() {
-      this.search = ''
+      this.search = "";
     }
   },
   computed: {
@@ -90,14 +102,14 @@ export default {
           }
         });
       } else {
-        return this.ideas
+        return this.ideas;
       }
     }
   }
 };
 </script>
 <style>
-  .clickable {
-    cursor: pointer;
-  }
+.clickable {
+  cursor: pointer;
+}
 </style>
