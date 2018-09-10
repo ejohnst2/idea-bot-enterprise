@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const TeamSchema = new Schema({
   botAuthorization: {
     type: String,
+    allowance: Number,
     required: true,
   }
 });
