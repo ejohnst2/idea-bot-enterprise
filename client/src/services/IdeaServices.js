@@ -1,7 +1,7 @@
 import Api from '@/services/Api';
 
 export default {
-  fetchIdeas() {
+  getIdeas() {
     return Api().get('idea');
   },
 };

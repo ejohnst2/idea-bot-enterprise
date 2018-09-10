@@ -4,8 +4,10 @@ const slackEventsApi = require("@slack/events-api");
 const SlackClient = require("@slack/client").WebClient;
 const passport = require("passport");
 const SlackStrategy = require("@aoberoi/passport-slack").default.Strategy;
-const { createMessageAdapter } = require('@slack/interactive-messages');
-const slackInteractions = createMessageAdapter(process.env.SLACK_SIGNING_SECRET);
+const { createMessageAdapter } = require("@slack/interactive-messages");
+const slackInteractions = createMessageAdapter(
+  process.env.SLACK_SIGNING_SECRET
+);
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -23,7 +25,9 @@ let UserModel = require("./models/User");
 
 app.get("/", (req, res) => {
   res.send(
-    `<a href="https://slack.com/oauth/authorize?client_id=${process.env.SLACK_CLIENT_ID}&scope=commands,bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`
+    `<a href="https://slack.com/oauth/authorize?client_id=${
+      process.env.SLACK_CLIENT_ID
+    }&scope=commands,bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`
   );
 });
 
@@ -32,8 +36,10 @@ app.get("/", (req, res) => {
 
 app.get("/dashboard", (req, res) => {
   res.send(
-  `<a href=https://slack.com/oauth/authorize?scope=identity.basic,identity.team&client_id=${process.env.SLACK_CLIENT_ID}><img alt="Sign in with Slack" height="40" width="172" src="https://platform.slack-edge.com/img/sign_in_with_slack.png" srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, https://platform.slack-edge.com/img/sign_in_with_slack@2x.png 2x" /></a>`
-  )
+    `<a href=https://slack.com/oauth/authorize?scope=identity.basic,identity.team&client_id=${
+      process.env.SLACK_CLIENT_ID
+    }><img alt="Sign in with Slack" height="40" width="172" src="https://platform.slack-edge.com/img/sign_in_with_slack.png" srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, https://platform.slack-edge.com/img/sign_in_with_slack@2x.png 2x" /></a>`
+  );
 });
 
 // cors init
@@ -54,7 +60,6 @@ app.use(passport.initialize());
 const UserSchema = require("./models/User");
 const TeamSchema = require("./models/Team");
 
-
 // the overall authentication strategy used for auth requests, conditional on whether it's add to slack or sign in with
 
 passport.use(
@@ -62,12 +67,12 @@ passport.use(
     {
       clientID: process.env.SLACK_CLIENT_ID,
       clientSecret: process.env.SLACK_CLIENT_SECRET,
-      scope: ['identity.basic', 'identity.team'],
+      scope: ["identity.basic", "identity.team"],
       skipUserProfile: true
     },
     (accessToken, scopes, team, extra, profiles, done) => {
-      console.log(team)
-      if (extra.bot != null){
+      console.log(team);
+      if (extra.bot != null) {
         Team.postTeamOnInstall(team, extra.bot.accessToken);
         botAuthorizations[team.id] = extra.bot.accessToken;
       }
@@ -157,7 +162,6 @@ slackEvents.on("reaction_added", (event, body) => {
   slack.chat
     .postMessage({ channel: event.item.channel, text: `testingtons` })
     .catch(console.error);
-
 });
 
 slackEvents.on("error", error => {
@@ -182,8 +186,6 @@ const Idea = require("./routes/Idea");
 const User = require("./routes/User");
 const Endorsement = require("./routes/Endorsement");
 
-
-
 app
   .route("/Team")
   .get(Team.getTeams)
@@ -201,108 +203,114 @@ app.route("/Idea").get(Idea.getIdeas);
  * @desc api endpoint for the /idea slash command
  */
 
-app.use('/slack/actions', slackInteractions.expressMiddleware());
-
+app.use("/slack/actions", slackInteractions.expressMiddleware());
 
 const firstIdea = {
-    "text": "Idea wasn't recorded because you're not yet a user within your team. Would you like to become one?",
-    "attachments": [
+  text:
+    "Idea wasn't recorded because you're not yet a user within your team. Would you like to become one?",
+  attachments: [
+    {
+      text: "Would you like to opt in?",
+      fallback: "Please contact your administrator to upgrade your plan.",
+      color: "#3AA3E3",
+      callback_id: "add_user",
+      attachment_type: "default",
+      actions: [
         {
-            "text": "Would you like to opt in?",
-            "fallback": "Please contact your administrator to upgrade your plan.",
-            "color": "#3AA3E3",
-            "callback_id": "add_user",
-            "attachment_type": "default",
-            "actions": [
-                {
-                    "name": "add_user",
-                    "text": "Yes",
-                    "type": "button",
-                    "value": "yes"
-                },
-                {
-                    "name": "add_user",
-                    "text": "No",
-                    "type": "button",
-                    "callback_id": "add_user",
-                    "value": "no"
-                }
-            ]
+          name: "add_user",
+          text: "Yes",
+          type: "button",
+          value: "yes"
+        },
+        {
+          name: "add_user",
+          text: "No",
+          type: "button",
+          callback_id: "add_user",
+          value: "no"
         }
-    ]
-}
-
+      ]
+    }
+  ]
+};
 
 // endorsement action, can endorse an idea directly on the idea itself in Slack
-slackInteractions.action('endorse_idea', addEndorsement);
+slackInteractions.action("endorse_idea", addEndorsement);
 
-function addEndorsement(payload){
-  Endorsement.postSlackEndorsement(payload)
+function addEndorsement(payload) {
+  Endorsement.postSlackEndorsement(payload);
 }
 
 // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
-function checkTeamAllowance(req){
+function checkTeamAllowance(req) {
   // const slack = new SlackClient(botAuthorizations[team.id]);
 
-  if (TeamSchema.findOne({team_id: req.slack_team_id }).allowance === UserSchema.count({ team: req.team_id })) {
+  if (
+    TeamSchema.findOne({ team_id: req.slack_team_id }).allowance ===
+    UserSchema.count({ team: req.team_id })
+  ) {
     // send admin a private message
   }
 }
 
 // for first time ideators to opt in as a user of the app
-slackInteractions.action({callbackId: 'add_user'}, createUserOnIdea)
+slackInteractions.action({ callbackId: "add_user" }, createUserOnIdea);
 
 function createUserOnIdea(payload, respond) {
-  if (payload.actions[0].value === 'yes') {
-    respond ({text: "Awesome, you're now a user and can now log your idea!. Give it a go!"});
+  if (payload.actions[0].value === "yes") {
+    respond({
+      text:
+        "Awesome, you're now a user and can now log your idea!. Give it a go!"
+    });
 
     User.postUser(payload);
     checkTeamAllowance(req.body);
   }
-  if (payload.actions[0].value === 'no') {
-    respond ({text: "Ok then, sorry to see you miss out on the ideation"});
+  if (payload.actions[0].value === "no") {
+    respond({ text: "Ok then, sorry to see you miss out on the ideation" });
   }
-};
-
+}
 
 // when a user posts an idea in a channel
 // add a slash command for ideaboard so people can access it on demand, make that only visible to the person
 
-app.post('/Idea', (req, res, next) => {
+app.post(
+  "/Idea",
+  (req, res, next) => {
+    const idea_response = {
+      response_type: "in_channel", // || ephermal
+      channel: req.channel_id,
+      text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`
+    };
 
-  const idea_response = {
-  response_type: 'in_channel', // || ephermal
-  channel: req.channel_id,
-  text: `<@${req.body.user_id}> posted a new idea! \n\n ${req.body.text}`,
-  };
-
-
-    UserSchema.findOne({
-          username: req.body.user_id
-      }, function(err, user) {
-          if (err) {
-              return done(err);
-          }
-          //No user was found... so give them the option to opt in
-          if (!user) {
-              // give user the ability to opt in
-              return res.json(firstIdea)
-          } else {
-            //found user, steady as she goes
-            Idea.postIdea(req.body)
-            res.json(idea_response);
-            next()
-          }
-      })
+    UserSchema.findOne(
+      {
+        username: req.body.user_id
+      },
+      function(err, user) {
+        if (err) {
+          return done(err);
+        }
+        //No user was found... so give them the option to opt in
+        if (!user) {
+          // give user the ability to opt in
+          return res.json(firstIdea);
+        } else {
+          //found user, steady as she goes
+          Idea.postIdea(req.body);
+          res.json(idea_response);
+          next();
+        }
+      }
+    );
   },
 
   (err, erq, res, next) => {
-  res.json(response)
-  res.status(500)
-  next()
-
-});
-
+    res.json(response);
+    res.status(500);
+    next();
+  }
+);
 
 /************************************************************************/
 

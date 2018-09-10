@@ -66,11 +66,11 @@ export default {
     };
   },
   mounted() {
-    this.getIdeas();
+    this.fetchIdeas();
   },
   methods: {
-    async getIdeas() {
-      const response = await IdeaServices.fetchIdeas();
+    async fetchIdeas() {
+      const response = await IdeaServices.getIdeas();
       this.ideas = response.data;
     },
     clearSearch() {
