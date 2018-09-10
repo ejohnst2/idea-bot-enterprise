@@ -14,22 +14,14 @@ const bodyParser = require("body-parser");
 const app = express();
 const port = process.env.PORT || 3000;
 const cors = require("cors");
+const serveStatic = require("serve-static")
 
-let UserModel = require("./models/User");
+// serve app to the home page
+app.use(serveStatic(__dirname + "/client/dist"))
 
 /**
  * SERVER
  */
-
-// serve index.html to client
-
-app.get("/", (req, res) => {
-  res.send(
-    `<a href="https://slack.com/oauth/authorize?client_id=${
-      process.env.SLACK_CLIENT_ID
-    }&scope=commands,bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>`
-  );
-});
 
 // serve dashboard.html to client
 // use sign in with Slack to verify access
