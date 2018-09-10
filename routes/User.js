@@ -9,20 +9,10 @@ function getUsers(req, res) {
   })
 }
 
-// create a method that crosschecks the allowance with the current amount of users.
-
 function postUser(req, res) {
   let newUser = new User({
-    username: req.user_id,
-    team: req.team_id
-  });
-  newUser.save();
-}
-
-function postUserPayload(payload, res) {
-  let newUser = new User({
-    username: payload.user.id,
-    team: payload.team.id
+    username: req.user.id,
+    team_id: req.team.id
   });
   newUser.save();
 }
@@ -30,6 +20,5 @@ function postUserPayload(payload, res) {
 
 module.exports = {
   getUsers,
-  postUserPayload,
   postUser
 };
