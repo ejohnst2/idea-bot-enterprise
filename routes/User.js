@@ -9,6 +9,15 @@ function getUsers(req, res) {
   })
 }
 
+function postAdminUser(req, res) {
+  let newUser = new User({
+    username: req.id,
+    team_id: req.team_id,
+    isAdmin: true
+  });
+  newUser.save();
+}
+
 function postUser(req, res) {
   let newUser = new User({
     username: req.user.id,
@@ -16,7 +25,6 @@ function postUser(req, res) {
   });
   newUser.save();
 }
-
 
 module.exports = {
   getUsers,

@@ -59,7 +59,7 @@ passport.use(
     {
       clientID: process.env.SLACK_CLIENT_ID,
       clientSecret: process.env.SLACK_CLIENT_SECRET,
-      scope: ["identity.basic", "identity.team"],
+      scope: ['identity.basic', 'users.list', 'chat:write:bot'],
       skipUserProfile: true
     },
     (accessToken, scopes, team, extra, profiles, done) => {
@@ -234,14 +234,28 @@ function addEndorsement(payload) {
 }
 
 // if amount of users meets the allowance, notify user to get in touch with administrator with admin name
-function checkTeamAllowance(req) {
-  // const slack = new SlackClient(botAuthorizations[team.id]);
+function checkTeamAllowance(req){
+  // connect to web client to call api methods such as retreiving info and sending direct messages
+  const web = new SlackClient(process.env.BOT_USER_ACCESS_TOKEN);
 
-  if (
-    TeamSchema.findOne({ team_id: req.slack_team_id }).allowance ===
-    UserSchema.count({ team: req.team_id })
-  ) {
-    // send admin a private message
+  if (TeamSchema.findOne({team_id: req.slack_team_id }).allowance === UserSchema.count({ team: req.team_id })) {
+    web.users.list()
+    .then((res) => {
+      res.members.forEach(member => {
+        // looping through to find all members where admin is true
+        if(member.is_admin === true) {
+          // store admin in DB
+          User.postAdminUser(member)
+          // message each admin to let them know that they need to upgrade their plan
+          web.chat.postMessage({ channel: member.id, text: `Your team is almost at its limit, log in to <https://www.innervate.app/${member.team_id}/|your team dashboard> to upgrade plan.` })
+          .then((res) => {
+            console.log('Message sent: ', res.ts);
+          })
+          .catch(console.error);
+        }
+      });
+    })
+    .catch(console.error);
   }
 }
 
