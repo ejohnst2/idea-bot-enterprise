@@ -124,18 +124,6 @@ app.get(
 
 app.use("/slack/events", slackEvents.expressMiddleware());
 
-slackEvents.on("reaction_added", (event, body) => {
-  const slack = new SlackClient(botAuthorizations[team.id]);
-
-  if (!slack) {
-    return console.error("No authorization for this team");
-  }
-
-  slack.chat
-    .postMessage({ channel: event.item.channel, text: `testingtons` })
-    .catch(console.error);
-});
-
 slackEvents.on("error", error => {
   if (error.code === slackEventsApi.errorCodes.TOKEN_VERIFICATION_FAILURE) {
     console.error(`An unverified request was sent to the Slack events Request URL. Request body: \
