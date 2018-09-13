@@ -5,13 +5,14 @@ const TeamSchema = new Schema({
   botAuthorization: {
     type: String,
     required: true,
+    unique: true
   },
-  slack_team_id:{
-    type: String,
+  slack_team_id: {
+    type: String
   },
   allowance: {
     type: Number,
-    required: true,
+    required: true
   }
 });
 
