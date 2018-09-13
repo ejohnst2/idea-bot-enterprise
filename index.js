@@ -100,26 +100,6 @@ const slackEvents = slackEventsApi.createEventAdapter(
   }
 );
 
-/**
- * @desc teams authorized to use the bot
- */
-const botAuthorizations = {};
-
-/**
- * @desc cache and lookup appropriate client info
- */
-const clients = {};
-
-function getClientByTeamId(teamId) {
-  if (!clients[teamId] && botAuthorizations[teamId]) {
-    clients[teamId] = new SlackClient(botAuthorizations[teamId]);
-  }
-  if (clients[teamId]) {
-    return clients[teamId];
-  }
-  return null;
-}
-
 app.get(
   "/auth/slack",
   passport.authenticate("slack", {
@@ -143,18 +123,6 @@ app.get(
 // get app using different capabilities of the slack API
 
 app.use("/slack/events", slackEvents.expressMiddleware());
-
-slackEvents.on("reaction_added", (event, body) => {
-  const slack = new SlackClient(botAuthorizations[team.id]);
-
-  if (!slack) {
-    return console.error("No authorization for this team");
-  }
-
-  slack.chat
-    .postMessage({ channel: event.item.channel, text: `testingtons` })
-    .catch(console.error);
-});
 
 slackEvents.on("error", error => {
   if (error.code === slackEventsApi.errorCodes.TOKEN_VERIFICATION_FAILURE) {
