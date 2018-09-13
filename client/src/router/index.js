@@ -3,6 +3,7 @@ import Router from 'vue-router';
 import Ideas from '@/components/Ideas';
 import Billing from '@/components/Billing';
 import Settings from '@/components/Settings';
+import Login from '@/components/Login';
 
 Vue.use(Router);
 
@@ -23,6 +24,11 @@ export default new Router({
       path: '/Billing',
       name: 'Billing',
       component: Billing,
+    },
+    {
+      path: '/Login',
+      name: 'Login',
+      component: Login,
     },
   ],
 });
