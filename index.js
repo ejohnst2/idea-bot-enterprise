@@ -80,8 +80,6 @@ passport.use(
   )
 );
 
-const MongoClient = require("mongodb").MongoClient;
-
 mongoose.connect(
   process.env.MONGO_DB_URI,
   {
