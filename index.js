@@ -100,26 +100,6 @@ const slackEvents = slackEventsApi.createEventAdapter(
   }
 );
 
-/**
- * @desc teams authorized to use the bot
- */
-const botAuthorizations = {};
-
-/**
- * @desc cache and lookup appropriate client info
- */
-const clients = {};
-
-function getClientByTeamId(teamId) {
-  if (!clients[teamId] && botAuthorizations[teamId]) {
-    clients[teamId] = new SlackClient(botAuthorizations[teamId]);
-  }
-  if (clients[teamId]) {
-    return clients[teamId];
-  }
-  return null;
-}
-
 app.get(
   "/auth/slack",
   passport.authenticate("slack", {
