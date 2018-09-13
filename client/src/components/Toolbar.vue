@@ -7,6 +7,7 @@
       <v-btn flat :to="'/'">Ideas</v-btn>
       <v-btn flat :to="'Billing'">Billing</v-btn>
       <v-btn flat :to="'Settings'">Settings</v-btn>
+      <v-btn flat :to="'Login'">Login</v-btn>
     </v-toolbar-items>
   </v-toolbar>
 </template>
