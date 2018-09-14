@@ -80,8 +80,6 @@ passport.use(
   )
 );
 
-const MongoClient = require("mongodb").MongoClient;
-
 mongoose.connect(
   process.env.MONGO_DB_URI,
   {
@@ -118,7 +116,7 @@ app.get(
   "/auth/slack/callback",
   passport.authenticate("slack", { session: false }),
   (req, res) => {
-    res.send("<p>Think Fish was successfully installed on your team.</p>");
+    res.redirect(`http://${process.env.BASE_URL}`);
   },
   (err, erq, res, next) => {
     res
@@ -156,7 +154,8 @@ const Endorsement = require("./routes/Endorsement");
 app
   .route("/Team")
   .get(Team.getTeams)
-  .post(Team.postTeam);
+  .post(Team.postTeam)
+  .post(Team.postTeamOnInstall);
 app
   .route("/Team/:id")
   .get(Team.getTeam)
@@ -173,32 +172,9 @@ app.route("/Idea").get(Idea.getIdeas);
 app.use("/slack/actions", slackInteractions.expressMiddleware());
 
 const firstIdea = {
-  text:
-    "Idea wasn't recorded because you're not yet a user within your team. Would you like to become one?",
-  attachments: [
-    {
-      text: "Would you like to opt in?",
-      fallback: "Please contact your administrator to upgrade your plan.",
-      color: "#3AA3E3",
-      callback_id: "add_user",
-      attachment_type: "default",
-      actions: [
-        {
-          name: "add_user",
-          text: "Yes",
-          type: "button",
-          value: "yes"
-        },
-        {
-          name: "add_user",
-          text: "No",
-          type: "button",
-          callback_id: "add_user",
-          value: "no"
-        }
-      ]
-    }
-  ]
+  text: `Please sign up as a user via the following link! http://${
+    process.env.BASE_URL
+  }/Login`
 };
 
 // endorsement action, can endorse an idea directly on the idea itself in Slack
@@ -247,19 +223,10 @@ function checkTeamAllowance(req) {
 // for first time ideators to opt in as a user of the app
 slackInteractions.action({ callbackId: "add_user" }, createUserOnIdea);
 
-function createUserOnIdea(payload, respond) {
-  if (payload.actions[0].value === "yes") {
-    respond({
-      text:
-        "Awesome, you're now a user and can now log your idea!. Give it a go!"
-    });
+function createUserOnIdea(payload) {
+  User.postUser(payload);
 
-    User.postUser(payload);
-    checkTeamAllowance(req.body);
-  }
-  if (payload.actions[0].value === "no") {
-    respond({ text: "Ok then, sorry to see you miss out on the ideation" });
-  }
+  checkTeamAllowance(req.body);
 }
 
 // when a user posts an idea in a channel

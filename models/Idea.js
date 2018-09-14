@@ -6,7 +6,11 @@ const IdeaSchema = new Schema({
     type: String,
     required: true,
   },
-  user: {
+  username: {
+    type: String,
+    required: true,
+  },
+  user_id: {
     type: String,
     required: true,
   },

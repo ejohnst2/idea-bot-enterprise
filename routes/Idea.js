@@ -22,7 +22,8 @@ function postIdea(req, res) {
 
     let newIdea = new Idea({
       text: req.text,
-      user: req.user_id,
+      username: req.name,
+      user_id: req.user_id,
       channel: req.channel_name,
       category: category,
       teamId: req.team_id
@@ -32,7 +33,8 @@ function postIdea(req, res) {
   } else {
     let newIdea = new Idea({
       text: req.text,
-      user: req.user_id,
+      username: req.user_name,
+      user_id: req.user_id,
       channel: req.channel_name,
       category: null,
       teamId: req.team_id
