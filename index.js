@@ -15,9 +15,23 @@ const app = express();
 const port = process.env.PORT || 3000;
 const cors = require("cors");
 const serveStatic = require("serve-static");
+const session = require("express-session");
 
 app.use(serveStatic(__dirname + "/client/dist"));
 app.use(cors({ origin: port }));
+
+app.use(
+  session({
+    secret: process.env.EXPRESS_SESSION_SECRET,
+    secure: true,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 6000,
+    },
+  })
+);
+
 app.use(passport.initialize());
 
 /**
