@@ -18,7 +18,11 @@ const serveStatic = require("serve-static");
 const session = require("express-session");
 
 app.use(serveStatic(__dirname + "/client/dist"));
-app.use(cors({ origin: port }));
+app.use(cors({
+  origin: port,
+  methods: ['GET', 'POST', 'UPDATE'],
+  credentials: true,
+}));
 
 app.use(
   session({
@@ -27,12 +31,23 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      maxAge: 6000,
-    },
+      maxAge: 6000
+    }
   })
 );
 
 app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function(user, cb) {
+  cb(null, user.id);
+});
+
+passport.deserializeUser(function(id, cb) {
+  User.findById(id, function(err, user) {
+    cb(err, user);
+  });
+});
 
 /**
  * @see https://github.com/slackapi/node-slack-events-api#usage
