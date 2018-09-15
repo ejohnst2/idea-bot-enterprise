@@ -16,8 +16,33 @@ const port = process.env.PORT || 3000;
 const cors = require("cors");
 const serveStatic = require("serve-static");
 
-// serve app to the home page
 app.use(serveStatic(__dirname + "/client/dist"));
+app.use(cors({ origin: port }));
+app.use(passport.initialize());
+
+/**
+ * @see https://github.com/slackapi/node-slack-events-api#usage
+ */
+const slackEvents = slackEventsApi.createEventAdapter(
+  process.env.SLACK_SIGNING_SECRET,
+  {
+    includeBody: true
+  }
+);
+
+/**
+ * @desc disclude slack uris as the slack middleware rejects body-parser requests
+ */
+app.use(/\/((?!slack).)*/, bodyParser.json());
+app.use(/\/((?!slack).)*/, bodyParser.urlencoded({ extended: true }));
+app.use(/\/((?!slack).)*/, bodyParser.text());
+app.use(/\/((?!slack).)*/, bodyParser.json({ type: "Header/json" }));
+
+/**
+ * @desc api endpoint for the /idea slash command
+ */
+app.use("/slack/events", slackEvents.expressMiddleware());
+app.use("/slack/actions", slackInteractions.expressMiddleware());
 
 /**
  * SERVER
@@ -33,19 +58,6 @@ app.get("/dashboard", (req, res) => {
     }><img alt="Sign in with Slack" height="40" width="172" src="https://platform.slack-edge.com/img/sign_in_with_slack.png" srcset="https://platform.slack-edge.com/img/sign_in_with_slack.png 1x, https://platform.slack-edge.com/img/sign_in_with_slack@2x.png 2x" /></a>`
   );
 });
-
-// cors init
-app.use(cors({ origin: port }));
-
-/**
- * @desc disclude slack uris as the slack middleware rejects body-parser requests
- */
-app.use(/\/((?!slack).)*/, bodyParser.json());
-app.use(/\/((?!slack).)*/, bodyParser.urlencoded({ extended: true }));
-app.use(/\/((?!slack).)*/, bodyParser.text());
-app.use(/\/((?!slack).)*/, bodyParser.json({ type: "Header/json" }));
-
-app.use(passport.initialize());
 
 /************************************************************************/
 
@@ -95,16 +107,6 @@ if (!module.parent) {
   app.listen(port);
 }
 
-/**
- * @see https://github.com/slackapi/node-slack-events-api#usage
- */
-const slackEvents = slackEventsApi.createEventAdapter(
-  process.env.SLACK_SIGNING_SECRET,
-  {
-    includeBody: true
-  }
-);
-
 app.get(
   "/auth/slack",
   passport.authenticate("slack", {
@@ -124,10 +126,6 @@ app.get(
       .send(`<p>Think Fish failed to install</p> <pre>${err}</pre>`);
   }
 );
-
-// get app using different capabilities of the slack API
-
-app.use("/slack/events", slackEvents.expressMiddleware());
 
 slackEvents.on("error", error => {
   if (error.code === slackEventsApi.errorCodes.TOKEN_VERIFICATION_FAILURE) {
@@ -164,12 +162,6 @@ app
 
 // get route for our ideas
 app.route("/Idea").get(Idea.getIdeas);
-
-/**
- * @desc api endpoint for the /idea slash command
- */
-
-app.use("/slack/actions", slackInteractions.expressMiddleware());
 
 const firstIdea = {
   text: `Please sign up as a user via the following link! http://${
