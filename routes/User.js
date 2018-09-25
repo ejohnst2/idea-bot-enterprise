@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const User = require("../models/User");
+const mongoose = require('mongoose')
+const User = require('../models/User')
 
 function getUsers(req, res) {
   const query = User.find({})
@@ -13,9 +13,9 @@ function postAdminUser(req, res) {
   let newUser = new User({
     user_id: req.id,
     team_id: req.team_id,
-    isAdmin: true
-  });
-  newUser.save();
+    isAdmin: true,
+  })
+  newUser.save()
 }
 
 function postUser(accessToken, profiles) {
@@ -34,11 +34,11 @@ function postUser(accessToken, profiles) {
     image_192: profiles.user.image_192,
     image_512: profiles.user.image_512,
     image_1024: profiles.user.image_1024,
-  });
-  newUser.save();
+  })
+  newUser.save()
 }
 
 module.exports = {
   getUsers,
-  postUser
-};
+  postUser,
+}

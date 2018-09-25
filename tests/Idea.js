@@ -1,4 +1,3 @@
-
 process.env.NODE_ENV = 'test'
 
 const mongoose = require('mongoose')
@@ -11,23 +10,23 @@ const Idea = require('../models/Idea')
 chai.use(chaiHtpp)
 
 describe('Idea', () => {
-
-  beforeEach((done) => {
-    Idea.deleteOne({}, (err) => {
+  beforeEach(done => {
+    Idea.deleteOne({}, err => {
       done()
     })
   })
 
   describe('/POST Idea', () => {
-    it('it should post an Idea', (done) => {
+    it('it should post an Idea', done => {
       let newIdea = {
         text: 'test idea',
         user: 't5345435-k90',
         channel: 'test-idea-slack',
-        teamId: 'g34543jjkl90'
+        teamId: 'g34543jjkl90',
       }
 
-      chai.request(server)
+      chai
+        .request(server)
         .post('/Idea/')
         .send(newIdea)
         .end((err, res) => {
