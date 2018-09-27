@@ -7,6 +7,8 @@ import Login from '@/components/Login';
 
 Vue.use(Router);
 
+// router.post('/register'
+
 export default new Router({
   mode: 'history',
   routes: [
@@ -32,3 +34,5 @@ export default new Router({
     },
   ],
 });
+
+// how do you make the routes so that all of the information is corresponding to the users team?

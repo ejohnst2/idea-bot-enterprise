@@ -13,6 +13,8 @@ const app = express()
 const port = process.env.PORT || 3000
 const cors = require('cors')
 const serveStatic = require('serve-static')
+const JwtStrategy = require('passport-jwt').Strategy
+const ExtractJwt = require('passport-jwt').ExtractJwt
 
 // serve app to the home page
 app.use(serveStatic(__dirname + '/client/dist'))
@@ -52,6 +54,8 @@ const TeamSchema = require('./models/Team')
 
 // the overall authentication strategy used for auth requests, conditional on whether it's add to slack or sign in with
 
+/*******SLACK LOGIN MIDDLEWARE****/
+
 passport.use(
   new SlackStrategy(
     {
@@ -72,11 +76,73 @@ passport.use(
         Team.postTeamOnInstall(team, extra.bot.accessToken)
       } else {
         User.postUser(accessToken, profiles)
+        console.log('how about this')
       }
       done(null, {})
     }
   )
 )
+
+app.get(
+  '/auth/slack',
+  passport.authenticate('slack', {
+    scope: ['bot'],
+  })
+)
+
+app.get(
+  '/auth/slack/callback',
+  passport.authenticate('slack', { session: false }),
+  (req, res) => {
+    // what if called JWT authentication here? that then redirects to the team dashboard
+    res.redirect(`http://${process.env.BASE_URL}`)
+  },
+  (err, erq, res, next) => {
+    res
+      .status(500)
+      .send(`<p>Think Fish failed to install</p> <pre>${err}</pre>`)
+  }
+)
+
+/*******JWT LOGIN MIDDLEWARE****/
+
+const opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = 'secret';
+opts.issuer = 'accounts.examplesoft.com';
+opts.audience = 'yoursite.net';
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    User.findOne({id: jwt_payload.sub}, function(err, user) {
+        if (err) {
+            return done(err, false);
+        }
+        if (user) {
+            return done(null, user);
+        } else {
+            return done(null, false);
+            // or you could create a new account
+        }
+    });
+}));
+
+// app.get('/login', passport.authenticate('jwt'));
+
+app.get('/login', passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+        res.send(req.user.profile);
+    }
+);
+
+
+// option 1
+// add if statement to authentication that if the user already exists in DB, then call the JWT strategy to direct to the dashboard
+
+// option 2
+// create a local passport strategy for the dashboard, but can this local strategy use slack login for authentication?
+// create local login middleware and slack login middleware and have them interact with eachother
+
+
+/************************************************************************/
 
 mongoose.connect(
   process.env.MONGO_DB_URI,
@@ -100,26 +166,6 @@ const slackEvents = slackEventsApi.createEventAdapter(
   process.env.SLACK_SIGNING_SECRET,
   {
     includeBody: true,
-  }
-)
-
-app.get(
-  '/auth/slack',
-  passport.authenticate('slack', {
-    scope: ['bot'],
-  })
-)
-
-app.get(
-  '/auth/slack/callback',
-  passport.authenticate('slack', { session: false }),
-  (req, res) => {
-    res.redirect(`http://${process.env.BASE_URL}`)
-  },
-  (err, erq, res, next) => {
-    res
-      .status(500)
-      .send(`<p>Think Fish failed to install</p> <pre>${err}</pre>`)
   }
 )
 

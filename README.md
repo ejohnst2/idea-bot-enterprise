@@ -1,5 +1,17 @@
 # Idea Bot Enterprise
 
+Development Environment Startup
+
+```
+yarn run dev
+yarn run bot
+cd client && yarn run dev
+```
+
+Navigate to `localhost:8080` inside your browser
+
+---
+
 Scripts
 
 ```
