@@ -13,11 +13,14 @@ const app = express()
 const port = process.env.PORT || 3000
 const cors = require('cors')
 const serveStatic = require('serve-static')
-const JwtStrategy = require('passport-jwt').Strategy
-const ExtractJwt = require('passport-jwt').ExtractJwt
+const auth = require("./auth/auth.js")();
+var users = require('./models/User');
+
+
 
 // serve app to the home page
 app.use(serveStatic(__dirname + '/client/dist'))
+
 
 /**
  * SERVER
@@ -76,7 +79,6 @@ passport.use(
         Team.postTeamOnInstall(team, extra.bot.accessToken)
       } else {
         User.postUser(accessToken, profiles)
-        console.log('how about this')
       }
       done(null, {})
     }
@@ -104,35 +106,79 @@ app.get(
   }
 )
 
+// ********** Token for JWT Auth
+
+// initialize authentication strategy for JWT
+app.use(auth.initialize());
+app.use(bodyParser.json());
+
+
+
+app.get("/user", auth.authenticate(), function(req, res) {
+    res.json(users[req.user.id]);
+});
+
+
+app.post("/token", function(req, res) {
+    if (req.body.email && req.body.password) {
+        var email = req.body.email;
+        var password = req.body.password;
+        var user = users.find(function(u) {
+            return u.email === email && u.password === password;
+        });
+        if (user) {
+            var payload = {
+                id: user.id
+            };
+            var token = jwt.encode(payload, cfg.jwtSecret);
+            res.json({
+                token: token
+            });
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+});
+
+
+// *****************************
+
 /*******JWT LOGIN MIDDLEWARE****/
 
-const opts = {}
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = 'secret';
-opts.issuer = 'accounts.examplesoft.com';
-opts.audience = 'yoursite.net';
-passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    User.findOne({id: jwt_payload.sub}, function(err, user) {
-        if (err) {
-            return done(err, false);
-        }
-        if (user) {
-            return done(null, user);
-        } else {
-            return done(null, false);
-            // or you could create a new account
-        }
-    });
-}));
+// function loginToTeamDashboard(object){
 
-// app.get('/login', passport.authenticate('jwt'));
+//   const opts = {}
+//   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+//   opts.secretOrKey = 'secret';
+//   opts.issuer = 'accounts.examplesoft.com';
+//   opts.audience = 'yoursite.net';
+//   passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+//       User.findOne({id: jwt_payload.sub}, function(err, user) {
+//           if (err) {
+//               return done(err, false);
+//           }
+//           if (user) {
+//               return done(null, user);
+//           } else {
+//               return done(null, false);
+//               // or you could create a new account
+//           }
+//       });
+//   }));
 
-app.get('/login', passport.authenticate('jwt', { session: false }),
-    function(req, res) {
-        res.send(req.user.profile);
-    }
-);
+//   app.post('/dashboard', passport.authenticate('jwt', { session: false }),
+//       function(req, res) {
+//         console.log('lets see')
+//           // res.send(req.user.profile);
+//       }
+//   );
+// };
 
+
+
+// When the user logs in, user info passed to custom callback which in turn creates a secure token with the information.
 
 // option 1
 // add if statement to authentication that if the user already exists in DB, then call the JWT strategy to direct to the dashboard
