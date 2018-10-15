@@ -14,6 +14,8 @@ const port = process.env.PORT || 3000
 const cors = require('cors')
 const serveStatic = require('serve-static')
 
+const session = require('express-session');
+
 // serve app to the home page
 app.use(serveStatic(__dirname + '/client/dist'))
 
@@ -32,6 +34,8 @@ app.get('/dashboard', (req, res) => {
   )
 })
 
+// TODO: call the function on the dashboard route and pass in the decoded user json
+
 // cors init
 app.use(cors({ origin: port }))
 
@@ -43,7 +47,20 @@ app.use(/\/((?!slack).)*/, bodyParser.urlencoded({ extended: true }))
 app.use(/\/((?!slack).)*/, bodyParser.text())
 app.use(/\/((?!slack).)*/, bodyParser.json({ type: 'Header/json' }))
 
+
+app.use(session({
+  cookie: {
+    // secure should be enabled in a production app, but disabled for simplicity
+    // secure: true,
+  },
+  resave: false,
+  saveUninitialized: false,
+  secret: 'CHANGE ME',
+}));
+
 app.use(passport.initialize())
+app.use(passport.session());
+
 
 /************************************************************************/
 
@@ -73,10 +90,22 @@ passport.use(
       } else {
         User.postUser(accessToken, profiles)
       }
-      done(null, {})
+      done(null, profiles.user)
     }
   )
 )
+
+// When using Passport's session functionality, you need to tell passport how to
+// serialize/deserialize the user object to the session store
+passport.serializeUser((user, done) => {
+  // Simplest possible serialization
+  done(null, JSON.stringify(user));
+});
+
+passport.deserializeUser((json, done) => {
+  // Simplest possible deserialization
+  done(null, JSON.parse(json));
+});
 
 mongoose.connect(
   process.env.MONGO_DB_URI,
@@ -114,7 +143,7 @@ app.get(
   '/auth/slack/callback',
   passport.authenticate('slack', { session: false }),
   (req, res) => {
-    res.redirect(`http://${process.env.BASE_URL}`)
+    res.redirect('/Idea')
   },
   (err, erq, res, next) => {
     res
@@ -122,6 +151,21 @@ app.get(
       .send(`<p>Think Fish failed to install</p> <pre>${err}</pre>`)
   }
 )
+
+// creating routes for specific teams and users to see their ideas
+
+app.param('userId', function(request, response, next, userId) {
+  // Fetch the story by its ID (storyId) from a database
+  // Save the found story object into request object
+  request.story = story;
+});
+
+// Home page that doesn't require logging in, but displays login state. See 'views/index.ejs'
+app.get('/:userId/ideas', (req, res) => {
+  console.log(req.user)
+});
+
+
 
 // get app using different capabilities of the slack API
 
@@ -161,7 +205,9 @@ app
   .put(Team.updateTeam)
 
 // get route for our ideas
-app.route('/Idea').get(Idea.getIdeas)
+app
+  .route('/Idea')
+  .get(Idea.getIdeas)
 
 /**
  * @desc api endpoint for the /idea slash command
