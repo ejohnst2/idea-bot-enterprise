@@ -1,6 +1,10 @@
 const mongoose = require('mongoose')
 const User = require('../models/User')
 
+var jwt = require('jsonwebtoken');
+var bcrypt = require('bcryptjs');
+var config = require('../config');
+
 function getUsers(req, res) {
   const query = User.find({})
   query.exec((err, Users) => {
@@ -34,7 +38,16 @@ function postUser(accessToken, profiles) {
     image_192: profiles.user.image_192,
     image_512: profiles.user.image_512,
     image_1024: profiles.user.image_1024,
-  })
+  },
+  function (err, user) {
+    if (err) return res.status(500).send("There was a problem registering the user.")
+    // create a token
+    let token = jwt.sign({ id: user._id }, config.secret, {
+      expiresIn: 86400 // expires in 24 hours
+    });
+    res.status(200).send({ auth: true, token: token });
+  });
+  console.log(token)
   newUser.save()
 }
 

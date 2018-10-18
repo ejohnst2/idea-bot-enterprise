@@ -17,6 +17,10 @@ const serveStatic = require('serve-static')
 // serve app to the home page
 app.use(serveStatic(__dirname + '/client/dist'))
 
+// AUTH
+var AuthController = require('./auth/AuthController');
+app.use('/api/auth', AuthController);
+
 /**
  * SERVER
  */
@@ -161,7 +165,9 @@ app
   .put(Team.updateTeam)
 
 // get route for our ideas
-app.route('/Idea').get(Idea.getIdeas)
+app
+  .route('/Idea')
+  .get(Idea.getIdeas)
 
 /**
  * @desc api endpoint for the /idea slash command
