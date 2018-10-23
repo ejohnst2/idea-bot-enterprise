@@ -5,8 +5,9 @@ Scripts
 ```
 db.teams.createIndex( { "botAuthorization": 1 }, { unique: true } )
 db.users.createIndex( { "user_id": 1 }, { unique: true } )
+```
 
-Getting Started With Slack 
+#### Getting Started With Slack 
 
 1. Go to https://api.slack.com and create a new app 
 2. Load your credentials into the .env 
